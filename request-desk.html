@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Game mô phỏng một phút duyệt yêu cầu của nhân viên.">
+  <title>Bàn Duyệt Yêu Cầu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #202c38;
+      --muted: #71808a;
+      --paper: #f7f5ef;
+      --white: #fffefa;
+      --line: #dfe2dc;
+      --coral: #ee755f;
+      --coral-dark: #c9544c;
+      --yellow: #f4cb56;
+      --mint: #a8d9c5;
+      --blue: #9dcbd9;
+      --navy: #344f68;
+      box-sizing: border-box;
+    }
+
+    *, *::before, *::after { box-sizing: inherit; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 5% 4%, rgba(244, 203, 86, .3) 0 9%, transparent 9.2%),
+        radial-gradient(circle at 97% 89%, rgba(168, 217, 197, .28) 0 12%, transparent 12.2%),
+        var(--paper);
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+
+    .shell {
+      width: min(1160px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 24px 0 38px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 42px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+      font-size: 16px;
+      transform: rotate(-8deg);
+    }
+
+    .desk-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .view { animation: appear .45s ease both; }
+
+    .intro {
+      max-width: 700px;
+      margin: 0 auto 38px;
+      text-align: center;
+    }
+
+    .kicker {
+      display: inline-block;
+      margin: 0 0 16px;
+      padding: 6px 11px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--mint);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transform: rotate(-2deg);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(46px, 8vw, 84px);
+      line-height: .95;
+      letter-spacing: -.07em;
+    }
+
+    .intro p:not(.kicker) {
+      max-width: 540px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .start-panel {
+      width: min(100%, 650px);
+      margin: 0 auto;
+      padding: 28px;
+      border: 2px solid var(--ink);
+      border-radius: 18px;
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--ink);
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .rule {
+      min-height: 104px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f1f2eb;
+    }
+
+    .rule:nth-child(1) { background: #f9e9a8; }
+    .rule:nth-child(2) { background: #f9d2c7; }
+    .rule:nth-child(3) { background: #d2ebdf; }
+
+    .rule strong { display: block; margin-bottom: 8px; font-size: 14px; }
+    .rule span { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+
+    .primary {
+      width: 100%;
+      padding: 15px 18px;
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      color: var(--white);
+      background: var(--coral);
+      box-shadow: 4px 4px 0 var(--ink);
+      font-weight: 800;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .primary:hover, .primary:focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); outline: none; }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 265px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .case-card {
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(20px, 4vw, 34px);
+      border: 2px solid var(--ink);
+      border-radius: 18px;
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--ink);
+    }
+
+    .case-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .queue-number { color: var(--muted); font-size: 12px; font-weight: 700; }
+
+    .priority {
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #73551a;
+      background: #f9e9a8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 28px 0 26px;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      background: var(--blue);
+      font-size: 24px;
+    }
+
+    .person h2 { margin: 0 0 3px; font-size: 18px; }
+    .person p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .request-label {
+      margin-bottom: 10px;
+      color: var(--coral-dark);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    #request-title {
+      max-width: 710px;
+      margin-bottom: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(27px, 4vw, 43px);
+      line-height: 1.04;
+      letter-spacing: -.055em;
+    }
+
+    #request-detail {
+      max-width: 650px;
+      margin-bottom: 26px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .decision-note {
+      margin-top: auto;
+      padding: 12px 14px;
+      border-left: 4px solid var(--yellow);
+      color: var(--muted);
+      background: #faf8f0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .action {
+      min-height: 66px;
+      padding: 10px;
+      border: 2px solid var(--ink);
+      border-radius: 10px;
+      color: var(--ink);
+      background: var(--white);
+      text-align: left;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    .action:hover, .action:focus-visible { transform: translateY(-3px); outline: none; }
+    .action.accept:hover, .action.accept:focus-visible { background: var(--mint); }
+    .action.reject:hover, .action.reject:focus-visible { background: #f7d0c8; }
+    .action.transfer:hover, .action.transfer:focus-visible { background: var(--blue); }
+    .action-key { display: block; margin-bottom: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .action-name { font-size: 13px; font-weight: 800; }
+
+    .sidebar { display: grid; gap: 14px; }
+
+    .timer-panel, .score-panel, .tip-panel {
+      padding: 20px;
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      background: var(--white);
+    }
+
+    .timer-panel { background: var(--navy); color: var(--white); }
+    .panel-label { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .timer-panel .panel-label { color: rgba(255, 254, 250, .66); }
+    #timer { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 52px; line-height: 1; letter-spacing: -.06em; }
+    .timer-track { height: 8px; margin-top: 16px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.22); }
+    #timer-fill { width: 100%; height: 100%; border-radius: inherit; background: var(--yellow); transition: width 1s linear, background .3s ease; }
+
+    .score-panel h3, .tip-panel h3 { margin-bottom: 14px; font-size: 15px; }
+    .score-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-top: 1px solid var(--line); font-size: 12px; }
+    .score-row:first-of-type { border-top: 0; }
+    .score-value { font-size: 18px; font-weight: 800; }
+    .score-value.accepted { color: #308e6b; }
+    .score-value.rejected { color: var(--coral-dark); }
+    .score-value.transferred { color: #3e8296; }
+    .tip-panel { color: var(--muted); background: #f1f2eb; font-size: 12px; line-height: 1.55; }
+    .tip-panel h3 { color: var(--ink); }
+
+    .summary-wrap { max-width: 850px; margin: 0 auto; }
+    .summary-head { margin-bottom: 28px; text-align: center; }
+    .summary-head h1 { margin-bottom: 10px; }
+    .summary-head p { margin: 0; color: var(--muted); }
+    .summary-card { padding: 25px; border: 2px solid var(--ink); border-radius: 18px; background: var(--white); box-shadow: 7px 7px 0 var(--ink); }
+    .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 26px; }
+    .summary-stat { padding: 17px; border-radius: 10px; }
+    .summary-stat.accepted { background: #d2ebdf; }
+    .summary-stat.rejected { background: #f9d2c7; }
+    .summary-stat.transferred { background: #d6edf2; }
+    .summary-stat strong { display: block; margin-bottom: 5px; font-size: 30px; line-height: 1; }
+    .summary-stat span { font-size: 12px; font-weight: 700; }
+    .summary-list-title { margin-bottom: 12px; font-size: 14px; }
+    .log-list { max-height: 260px; margin: 0 0 24px; padding: 0; overflow: auto; list-style: none; border-top: 1px solid var(--line); }
+    .log-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .log-request { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log-result { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+    .log-result.accepted { color: #277858; background: #d2ebdf; }
+    .log-result.rejected { color: #a4453e; background: #f9d2c7; }
+    .log-result.transferred { color: #357587; background: #d6edf2; }
+    .summary-actions { display: flex; gap: 10px; }
+    .secondary { flex: 1; padding: 13px 16px; border: 2px solid var(--ink); border-radius: 10px; color: var(--ink); background: transparent; font-weight: 800; }
+    .secondary:hover, .secondary:focus-visible { background: #f1f2eb; outline: none; }
+    .summary-actions .primary { flex: 1; }
+
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 800px) {
+      .game-layout { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: repeat(3, 1fr); }
+      .tip-panel { display: none; }
+      .timer-panel, .score-panel { padding: 16px; }
+      #timer { font-size: 42px; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 26px, 500px); padding-top: 16px; }
+      .topbar { margin-bottom: 56px; }
+      .desk-label { display: none; }
+      h1 { font-size: clamp(43px, 14vw, 66px); }
+      .start-panel, .case-card, .summary-card { padding: 18px; }
+      .rules, .summary-stats { grid-template-columns: 1fr; }
+      .rule { min-height: auto; }
+      .case-card { min-height: 0; }
+      .person { margin: 22px 0; }
+      .actions { grid-template-columns: 1fr; }
+      .action { min-height: 58px; }
+      .sidebar { grid-template-columns: 1fr 1.35fr; }
+      .summary-actions { flex-direction: column-reverse; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Về Góc Xả Stress">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span>Góc Xả Stress</span>
+      </a>
+      <span class="desk-label">Bàn duyệt yêu cầu · Ca 01</span>
+    </header>
+
+    <main>
+      <section id="start-view" class="view">
+        <div class="intro">
+          <p class="kicker">Mô phỏng công sở</p>
+          <h1>Bàn Duyệt<br>Yêu Cầu</h1>
+          <p>Một phút. Một núi yêu cầu. Bạn là người cuối cùng quyết định: duyệt, từ chối, hay đẩy quả bóng sang phòng ban khác?</p>
+        </div>
+        <div class="start-panel">
+          <div class="rules">
+            <div class="rule"><strong>Chấp nhận</strong><span>Khi yêu cầu hợp lý, hoặc bạn thấy hôm nay đủ mệt rồi.</span></div>
+            <div class="rule"><strong>Từ chối</strong><span>Khi nó vô lý đến mức cần được nói ra thành lời.</span></div>
+            <div class="rule"><strong>Chuyển giao</strong><span>Khi đây rõ ràng là việc của một phòng ban khác.</span></div>
+          </div>
+          <button id="start-button" class="primary" type="button">Bắt đầu ca trực · 60 giây</button>
+        </div>
+      </section>
+
+      <section id="game-view" class="view" hidden>
+        <div class="game-layout">
+          <article class="case-card" aria-live="polite">
+            <div class="case-head">
+              <span id="queue-number" class="queue-number">YÊU CẦU 01</span>
+              <span id="priority" class="priority">BÌNH THƯỜNG</span>
+            </div>
+            <div class="person">
+              <div id="avatar" class="avatar" aria-hidden="true">🧑‍💻</div>
+              <div>
+                <h2 id="employee">Đang tải...</h2>
+                <p id="department">Phòng ban</p>
+              </div>
+            </div>
+            <p class="request-label">Nội dung yêu cầu</p>
+            <h1 id="request-title">Đang tải yêu cầu...</h1>
+            <p id="request-detail"></p>
+            <div class="decision-note">Hãy tin vào trực giác. Không có đáp án tuyệt đối, chỉ có hậu quả rất cụ thể.</div>
+            <div class="actions" aria-label="Các quyết định">
+              <button class="action accept" data-decision="accepted" type="button"><span class="action-key">A · DUYỆT</span><span class="action-name">Cho qua</span></button>
+              <button class="action reject" data-decision="rejected" type="button"><span class="action-key">X · TỪ CHỐI</span><span class="action-name">Xin lỗi nhé</span></button>
+              <button class="action transfer" data-decision="transferred" type="button"><span class="action-key">T · CHUYỂN</span><span class="action-name">Để phòng khác lo</span></button>
+            </div>
+          </article>
+
+          <aside class="sidebar">
+            <div class="timer-panel">
+              <p class="panel-label">Thời gian còn lại</p>
+              <p id="timer">01:00</p>
+              <div class="timer-track"><div id="timer-fill"></div></div>
+            </div>
+            <div class="score-panel">
+              <h3>Ca trực hôm nay</h3>
+              <div class="score-row"><span>Đã duyệt</span><strong id="accepted-count" class="score-value accepted">0</strong></div>
+              <div class="score-row"><span>Đã từ chối</span><strong id="rejected-count" class="score-value rejected">0</strong></div>
+              <div class="score-row"><span>Đã chuyển</span><strong id="transferred-count" class="score-value transferred">0</strong></div>
+            </div>
+            <div class="tip-panel"><h3>Mẹo của quản lý</h3>Nhấn phím <strong>A</strong>, <strong>X</strong> hoặc <strong>T</strong> để duyệt nhanh. Nhưng đọc kỹ nhé, có người đang xin ngân sách để mua... một chiếc chuông gọi trà.</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="summary-view" class="view summary-wrap" hidden>
+        <div class="summary-head">
+          <p class="kicker">Hết ca</p>
+          <h1>Biên bản<br>một phút.</h1>
+          <p id="summary-message">Bạn đã sống sót qua một ca làm việc rất đặc biệt.</p>
+        </div>
+        <div class="summary-card">
+          <div class="summary-stats">
+            <div class="summary-stat accepted"><strong id="summary-accepted">0</strong><span>yêu cầu đã duyệt</span></div>
+            <div class="summary-stat rejected"><strong id="summary-rejected">0</strong><span>yêu cầu đã từ chối</span></div>
+            <div class="summary-stat transferred"><strong id="summary-transferred">0</strong><span>yêu cầu đã chuyển</span></div>
+          </div>
+          <h2 class="summary-list-title">Nhật ký quyết định</h2>
+          <ul id="log-list" class="log-list"></ul>
+          <div class="summary-actions">
+            <a class="secondary" href="index.html">Về trang chủ</a>
+            <button id="restart-button" class="primary" type="button">Bắt đầu ca mới</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const requests = [
+      { name: 'Minh Anh', department: 'Marketing', avatar: '🧑‍🎨', priority: 'GẤP', title: 'Xin duyệt ngân sách mua một chiếc chuông gọi trà.', detail: 'Lý do: Nhân viên pha trà ở tầng 3 không nghe thấy tiếng gọi bằng telepathy.', kind: 'practical' },
+      { name: 'Quốc Bảo', department: 'Kỹ thuật', avatar: '👨‍💻', priority: 'BÌNH THƯỜNG', title: 'Cho phép deploy code vào thứ Sáu lúc 17:59.', detail: 'Cam kết: Nếu có sự cố thì sẽ... cùng nhau học được rất nhiều điều.', kind: 'risky' },
+      { name: 'Thu Hà', department: 'Nhân sự', avatar: '👩‍💼', priority: 'KHẨN CẤP', title: 'Xin thêm một ngày nghỉ để hồi phục sau ngày nghỉ hôm qua.', detail: 'Ghi chú: Đây là vấn đề về tinh thần, thể chất và có thể cả tâm linh.', kind: 'silly' },
+      { name: 'Đức Long', department: 'Kinh doanh', avatar: '🧑‍💼', priority: 'BÌNH THƯỜNG', title: 'Đổi tên chức danh thành “Phù thủy chốt đơn”.', detail: 'Mục tiêu: Khiến chữ ký email có thêm một chút phép thuật.', kind: 'silly' },
+      { name: 'Bảo Ngọc', department: 'Tài chính', avatar: '👩‍🔬', priority: 'GẤP', title: 'Mua một chiếc ghế công thái học cho... cây văn phòng.', detail: 'Cây trầu bà đã ngồi sai tư thế suốt ba quý và đang có dấu hiệu đau lưng.', kind: 'silly' },
+      { name: 'Hoàng Nam', department: 'Sản phẩm', avatar: '🧑‍🚀', priority: 'BÌNH THƯỜNG', title: 'Cho phép cả team họp trong im lặng bằng ánh mắt.', detail: 'Phương án này sẽ tiết kiệm thời gian, nhưng cần phòng Hành chính mua thêm rèm.', kind: 'transfer' },
+      { name: 'Khánh Linh', department: 'Chăm sóc khách hàng', avatar: '👩‍💻', priority: 'KHẨN CẤP', title: 'Xin một ngày không nhận email, chỉ nhận thư bồ câu.', detail: 'Lý do: Hộp thư đến đang có 1.204 email chưa đọc và một lời tiên tri.', kind: 'silly' },
+      { name: 'Tuấn Kiệt', department: 'Pháp chế', avatar: '🧑‍⚖️', priority: 'GẤP', title: 'Mời pháp chế xem giúp điều khoản “vui vẻ lên”.', detail: 'Điều khoản này xuất hiện trong toàn bộ 47 bản hợp đồng và chưa ai hiểu nó có nghĩa gì.', kind: 'transfer' },
+      { name: 'Mai Phương', department: 'Thiết kế', avatar: '👩‍🎨', priority: 'BÌNH THƯỜNG', title: 'Đổi logo công ty thành một con vịt mặc blazer.', detail: 'Nghiên cứu người dùng cho thấy 100% người được hỏi thích vịt.', kind: 'creative' },
+      { name: 'Anh Duy', department: 'Vận hành', avatar: '🧑‍🔧', priority: 'GẤP', title: 'Cho phép làm việc tại nhà vì chiếc ghế ở văn phòng nhớ tôi.', detail: 'Bằng chứng đính kèm: một tấm ảnh chiếc ghế nhìn ra cửa sổ.', kind: 'silly' },
+      { name: 'Ngọc Trâm', department: 'Nghiên cứu', avatar: '👩‍🔬', priority: 'BÌNH THƯỜNG', title: 'Mua thêm một màn hình để theo dõi màn hình hiện tại.', detail: 'Đề tài nghiên cứu: Liệu năng suất có tăng khi ta quan sát nó không?', kind: 'transfer' },
+      { name: 'Hải Đăng', department: 'IT Helpdesk', avatar: '🧑‍🔧', priority: 'KHẨN CẤP', title: 'Xin cấp quyền admin để đổi hình nền thành hoàng hôn.', detail: 'Máy tính đang chạy tốt. Nhưng tinh thần người dùng thì chưa chắc.', kind: 'risky' },
+      { name: 'Yến Nhi', department: 'Truyền thông', avatar: '👩‍💼', priority: 'GẤP', title: 'Đặt tên cuộc họp là “Cuộc họp không phải cuộc họp”.', detail: 'Mục đích: Thu hút những người đã mệt mỏi với việc nghe chữ cuộc họp.', kind: 'silly' },
+      { name: 'Gia Huy', department: 'Kho vận', avatar: '🧑‍🚚', priority: 'BÌNH THƯỜNG', title: 'Xin ngân sách mua bảng chỉ đường đến phòng họp.', detail: 'Đã có bảng chỉ đường đến phòng họp. Nhưng bảng cũng đang bị lạc.', kind: 'transfer' },
+      { name: 'Thanh Vy', department: 'Phát triển', avatar: '👩‍💻', priority: 'KHẨN CẤP', title: 'Cho phép đặt tên biến là “đừng hỏi tôi”.', detail: 'Lý do: Biến này đã tồn tại từ trước khi tài liệu kỹ thuật ra đời.', kind: 'risky' },
+      { name: 'Vũ Hoàng', department: 'Ban giám đốc', avatar: '🧑‍✈️', priority: 'GẤP', title: 'Xin duyệt ngân sách cho một buổi brainstorming dưới nước.', detail: 'Địa điểm dự kiến: bể bơi. Ý tưởng dự kiến: sẽ nổi lên.', kind: 'transfer' },
+      { name: 'Tú Uyên', department: 'Kế toán', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Đổi mật khẩu Wi-Fi thành một câu thơ lục bát.', detail: 'Mọi người sẽ nhớ mật khẩu. Có thể sẽ nhớ luôn cả quê hương.', kind: 'creative' },
+      { name: 'Trung Hiếu', department: 'Bảo mật', avatar: '🧑‍💻', priority: 'KHẨN CẤP', title: 'Xin in mật khẩu hệ thống ra giấy để cất vào két.', detail: 'Đề xuất bổ sung: dán mật khẩu lên mặt trước két để không quên.', kind: 'risky' }
+    ];
+
+    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false };
+    const $ = (selector) => document.querySelector(selector);
+    const views = { start: $('#start-view'), game: $('#game-view'), summary: $('#summary-view') };
+
+    function shuffledRequests() {
+      return [...requests].sort(() => Math.random() - .5);
+    }
+
+    function showView(view) {
+      Object.values(views).forEach((item) => { item.hidden = true; });
+      views[view].hidden = false;
+    }
+
+    function updateScore() {
+      ['accepted', 'rejected', 'transferred'].forEach((type) => {
+        $(`#${type}-count`).textContent = state.results.filter((item) => item.decision === type).length;
+      });
+    }
+
+    function renderRequest() {
+      const item = state.queue[state.current % state.queue.length];
+      $('#queue-number').textContent = `YÊU CẦU ${String(state.results.length + 1).padStart(2, '0')}`;
+      $('#priority').textContent = item.priority;
+      $('#avatar').textContent = item.avatar;
+      $('#employee').textContent = item.name;
+      $('#department').textContent = item.department;
+      $('#request-title').textContent = item.title;
+      $('#request-detail').textContent = item.detail;
+      state.current += 1;
+    }
+
+    function renderTimer() {
+      const seconds = Math.max(0, state.seconds);
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      $('#timer').textContent = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+      $('#timer-fill').style.width = `${(seconds / 60) * 100}%`;
+      if (seconds <= 15) $('#timer-fill').style.background = 'var(--coral)';
+    }
+
+    function decide(decision) {
+      if (!state.running) return;
+      const item = state.queue[(state.current - 1) % state.queue.length];
+      state.results.push({ request: item.title, decision });
+      updateScore();
+      renderRequest();
+    }
+
+    function endGame() {
+      if (!state.running) return;
+      state.running = false;
+      clearInterval(state.timerId);
+      ['accepted', 'rejected', 'transferred'].forEach((type) => {
+        $(`#summary-${type}`).textContent = state.results.filter((item) => item.decision === type).length;
+      });
+      const total = state.results.length;
+      $('#summary-message').textContent = total > 0
+        ? `Bạn đã xử lý ${total} yêu cầu. Phòng Nhân sự đang xem xét việc tặng bạn một chiếc huy hiệu.`
+        : 'Bạn chưa xử lý yêu cầu nào. Đó cũng là một kiểu quản lý thời gian.';
+      $('#log-list').innerHTML = state.results.map((item) => {
+        const labels = { accepted: 'ĐÃ DUYỆT', rejected: 'ĐÃ TỪ CHỐI', transferred: 'ĐÃ CHUYỂN' };
+        return `<li class="log-item"><span class="log-request">${item.request}</span><span class="log-result ${item.decision}">${labels[item.decision]}</span></li>`;
+      }).join('');
+      showView('summary');
+    }
+
+    function startGame() {
+      clearInterval(state.timerId);
+      state.seconds = 60;
+      state.current = 0;
+      state.results = [];
+      state.queue = shuffledRequests();
+      state.running = true;
+      $('#timer-fill').style.background = 'var(--yellow)';
+      updateScore();
+      renderTimer();
+      renderRequest();
+      showView('game');
+      state.timerId = setInterval(() => {
+        state.seconds -= 1;
+        renderTimer();
+        if (state.seconds <= 0) endGame();
+      }, 1000);
+    }
+
+    $('#start-button').addEventListener('click', startGame);
+    $('#restart-button').addEventListener('click', startGame);
+    document.querySelectorAll('[data-decision]').forEach((button) => {
+      button.addEventListener('click', () => decide(button.dataset.decision));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (!state.running || event.repeat) return;
+      const shortcuts = { a: 'accepted', x: 'rejected', t: 'transferred' };
+      if (shortcuts[event.key.toLowerCase()]) decide(shortcuts[event.key.toLowerCase()]);
+    });
+  </script>
+</body>
+</html>

@@ -114,7 +114,7 @@
 
     .games {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 18px;
       margin-top: 64px;
     }
@@ -143,6 +143,7 @@
 
     .game.atm { background: var(--blue); }
     .game.stress { background: var(--coral); }
+    .game.requests { background: var(--yellow); }
 
     .game::after {
       position: absolute;
@@ -212,6 +213,10 @@
       .game { min-height: 230px; }
       footer { margin-top: 42px; }
     }
+
+    @media (min-width: 641px) and (max-width: 900px) {
+      .games { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
   </style>
 </head>
 <body>
@@ -228,7 +233,7 @@
       <section class="intro" aria-labelledby="page-title">
         <p class="eyebrow">Trạm nạp lại năng lượng</p>
         <h1 id="page-title">Bấm một chút,<br>nhẹ đầu một chút.</h1>
-        <p class="lead">Hai trò chơi nhỏ cho những lúc bạn muốn tạm gác deadline sang một bên và để đôi tay làm điều gì đó vui vui.</p>
+        <p class="lead">Ba trò chơi nhỏ cho những lúc bạn muốn tạm gác deadline sang một bên và để đôi tay làm điều gì đó vui vui.</p>
       </section>
 
       <section class="games" aria-label="Chọn một trò chơi">
@@ -248,6 +253,15 @@
             <p class="game-copy">Chạm, kéo, phá tan mọi thứ đang làm bạn bực mình.</p>
           </div>
           <div class="game-bottom"><span class="launch">Vào chơi <span class="arrow" aria-hidden="true">↗</span></span></div>
+        </a>
+
+        <a class="game requests" href="request-desk.html">
+          <div class="game-top">
+            <span class="game-number">03 / CA TRỰC</span>
+            <h2>Bàn Duyệt Yêu Cầu</h2>
+            <p class="game-copy">Một phút xử lý yêu cầu công sở. Có những việc rất hợp lý, và có cả vịt mặc blazer.</p>
+          </div>
+          <div class="game-bottom"><span class="launch">Nhận ca <span class="arrow" aria-hidden="true">↗</span></span></div>
         </a>
       </section>
     </main>
