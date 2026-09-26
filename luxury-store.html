@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efdf">
+  <meta name="description" content="Dùng tiền ATM Vô Hạn để sưu tầm những món đồ xa xỉ trong mơ.">
+  <title>Đế Chế Xa Xỉ – Cửa hàng trong mơ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f4efdf;
+      --ink: #182c27;
+      --muted: #69756d;
+      --green: #20483c;
+      --green-dark: #15372e;
+      --gold: #b68b38;
+      --line: rgba(24, 44, 39, .18);
+      --rose: #bb584a;
+      box-sizing: border-box;
+      color-scheme: light;
+    }
+
+    *, *::before, *::after { box-sizing: inherit; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: repeating-linear-gradient(135deg, transparent 0 34px, rgba(32, 72, 60, .035) 34px 35px);
+      font-family: 'Be Vietnam Pro', sans-serif;
+    }
+
+    button, a { font: inherit; }
+
+    button:focus-visible, a:focus-visible {
+      outline: 3px solid var(--rose);
+      outline-offset: 3px;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 20px 0 64px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 48px;
+    }
+
+    .brand, .back, .wallet {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .brand {
+      gap: 10px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 32px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: #f7d681;
+      font-size: 18px;
+    }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+
+    .back {
+      gap: 7px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .wallet {
+      min-height: 40px;
+      gap: 10px;
+      padding: 5px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 253, 247, .68);
+    }
+
+    .wallet-label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    #balance { color: var(--green-dark); font-size: 15px; font-weight: 800; white-space: nowrap; }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 28px;
+      margin: 45px 0 32px;
+      padding: 34px 0 30px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--rose);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 730px;
+      margin-bottom: 12px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 1;
+    }
+
+    .hero-copy { max-width: 540px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .fortune {
+      min-width: 150px;
+      padding-left: 22px;
+      border-left: 1px solid var(--line);
+      text-align: right;
+    }
+
+    .fortune span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .fortune strong { display: block; margin-top: 4px; color: var(--green); font-family: 'Playfair Display', Georgia, serif; font-size: 30px; }
+
+    .overview {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .overview h2 { margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 26px; }
+    #collection { color: var(--muted); font-size: 12px; font-weight: 700; }
+
+    .filters {
+      display: flex;
+      gap: 7px;
+      padding: 16px 0 20px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .filter {
+      flex: none;
+      min-height: 36px;
+      padding: 6px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter[aria-pressed="true"] { border-color: var(--green); background: var(--green); color: #fffdf4; }
+
+    .catalog {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .item {
+      position: relative;
+      display: flex;
+      min-height: 248px;
+      flex-direction: column;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(255, 253, 247, .78);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .item:hover { transform: translateY(-3px); border-color: rgba(32, 72, 60, .55); background: #fffdf7; }
+
+    .item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .item-icon { font-size: 42px; line-height: 1.15; }
+    .owned { min-width: 30px; padding: 4px 7px; border-radius: 999px; background: #e4e8d9; color: var(--green); font-size: 11px; font-weight: 800; text-align: center; }
+    .item-category { margin: 18px 0 5px; color: var(--rose); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .item h3 { margin-bottom: 6px; font-family: 'Playfair Display', Georgia, serif; font-size: 20px; line-height: 1.2; }
+    .item-desc { min-height: 36px; margin-bottom: 16px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+
+    .item-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .price { color: var(--green); font-size: 12px; font-weight: 800; line-height: 1.35; }
+    .price small { display: block; color: var(--muted); font-size: 10px; font-weight: 500; }
+
+    .buy {
+      flex: none;
+      min-width: 78px;
+      min-height: 36px;
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 4px;
+      background: var(--green);
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .buy:hover:not(:disabled) { background: var(--green-dark); }
+    .buy:disabled { background: #d8d9d0; color: #7b817b; cursor: not-allowed; }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: min(420px, calc(100% - 40px));
+      padding: 13px 18px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 5px;
+      background: var(--green-dark);
+      box-shadow: 0 8px 28px rgba(21, 55, 46, .2);
+      color: white;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 28px, 520px); padding-top: 12px; }
+      .topbar { align-items: flex-start; }
+      .top-actions { align-items: flex-end; flex-direction: column-reverse; gap: 5px; }
+      .wallet { min-height: 34px; padding: 4px 10px; }
+      .wallet-label { display: none; }
+      #balance { font-size: 13px; }
+      .hero { grid-template-columns: 1fr; gap: 17px; margin-top: 28px; padding: 26px 0 22px; }
+      h1 { max-width: 440px; font-size: 49px; }
+      .fortune { display: flex; align-items: baseline; gap: 9px; padding: 0; border: 0; text-align: left; }
+      .fortune strong { font-size: 25px; }
+      .catalog { grid-template-columns: 1fr; gap: 10px; }
+      .item { min-height: 210px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span><span>Đế Chế Xa Xỉ</span></a>
+      <div class="top-actions">
+        <a class="back" href="infinite-atm.html">← Trở lại ATM</a>
+        <div class="wallet" aria-live="polite"><span class="wallet-label">SỐ DƯ KHẢ DỤNG</span><strong id="balance">0 ₫</strong></div>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Cửa hàng của giới siêu giàu</p>
+        <h1 id="page-title">Thích gì,<br>mua nấy.</h1>
+        <p class="hero-copy">Từ một món trang sức vượt thời gian đến hòn đảo chỉ có tên bạn trên bản đồ. Tiền từ ATM Vô Hạn đã sẵn sàng để biến mọi ý thích thành tài sản.</p>
+      </div>
+      <div class="fortune"><span>ĐÃ TIÊU</span><strong id="spent">0 ₫</strong></div>
+    </section>
+
+    <section aria-labelledby="catalog-title">
+      <div class="overview">
+        <h2 id="catalog-title">Bộ sưu tập</h2>
+        <span id="collection">0 món sở hữu</span>
+      </div>
+      <nav class="filters" aria-label="Lọc theo danh mục" id="filters"></nav>
+      <div class="catalog" id="catalog" aria-live="polite"></div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const KEY = 'atmvohan_v1';
+      const ITEMS = [
+        { e: '⌚', n: 'Đồng hồ cơ Thụy Sĩ', d: 'Bộ máy thủ công, truyền đời qua nhiều thế hệ.', p: 5e6, c: 'Đẳng cấp' },
+        { e: '💎', n: 'Nhẫn kim cương 5 carat', d: 'Một viên đá đủ khiến mọi ánh nhìn dừng lại.', p: 4e8, c: 'Đẳng cấp' },
+        { e: '👜', n: 'Túi xách haute couture', d: 'Chế tác thủ công, chỉ có một chiếc trên thế giới.', p: 3e10, c: 'Đẳng cấp' },
+        { e: '🏎️', n: 'Siêu xe Ý phiên bản giới hạn', d: 'Động cơ gầm vang và tốc độ không cần giải thích.', p: 6e11, c: 'Di chuyển' },
+        { e: '🏙️', n: 'Penthouse nhìn toàn thành phố', d: 'Tầng cao nhất, bể bơi riêng, phố thị dưới chân.', p: 5e12, c: 'Bất động sản' },
+        { e: '🛥️', n: 'Du thuyền riêng 100 mét', d: 'Nhà hàng, rạp chiếu phim và đường chân trời của riêng bạn.', p: 8e13, c: 'Di chuyển' },
+        { e: '✈️', n: 'Phi cơ phản lực riêng', d: 'Lịch trình do bạn chọn, không cần xem bảng giờ bay.', p: 9e14, c: 'Di chuyển' },
+        { e: '🏝️', n: 'Đảo tư nhân giữa Thái Bình Dương', d: 'Bãi biển vắng, biệt thự riêng và chẳng có hàng xóm.', p: 8e15, c: 'Bất động sản' },
+        { e: '🏰', n: 'Lâu đài châu Âu', d: 'Tháp đá cổ kính với khu vườn rộng đến tận chân trời.', p: 9e16, c: 'Bất động sản' },
+        { e: '🏨', n: 'Khách sạn 7 sao của riêng bạn', d: 'Từng căn phòng đều phục vụ một vị khách: bạn.', p: 1e18, c: 'Đế chế' },
+        { e: '⚽', n: 'Câu lạc bộ bóng đá hàng đầu', d: 'Sân vận động kín chỗ và chiếc cúp mang tên bạn.', p: 2e19, c: 'Đế chế' },
+        { e: '🛰️', n: 'Vệ tinh viễn thông riêng', d: 'Phủ sóng cả hành tinh bằng tài sản trên quỹ đạo.', p: 1e20, c: 'Đế chế' },
+        { e: '🌌', n: 'Quyền sở hữu cả vũ trụ', d: 'Thỏa thuận lớn nhất lịch sử. Bảo hành bảy ngày.', p: 1e21, c: 'Đế chế' }
+      ];
+      const categories = ['Tất cả', ...new Set(ITEMS.map(item => item.c))];
+      let state = { m: 0, e: 0, s: 0, o: [] };
+      let filter = 'Tất cả';
+      let toastTimer;
+      const balance = document.getElementById('balance');
+      const spent = document.getElementById('spent');
+      const collection = document.getElementById('collection');
+      const catalog = document.getElementById('catalog');
+      const filters = document.getElementById('filters');
+      const toast = document.getElementById('toast');
+
+      function number(value) {
+        const units = [[1e21, 'nghìn tỷ tỷ'], [1e18, 'tỷ tỷ'], [1e15, 'triệu tỷ'], [1e12, 'nghìn tỷ'], [1e9, 'tỷ'], [1e6, 'triệu']];
+        for (const [size, unit] of units) {
+          if (value >= size) {
+            const scaled = value / size;
+            let formatted = scaled >= 100 ? scaled.toFixed(0) : scaled >= 10 ? scaled.toFixed(1) : scaled.toFixed(2);
+            if (formatted.includes('.')) formatted = formatted.replace(/\.?0+$/, '');
+            return formatted.replace('.', ',') + ' ' + unit;
+          }
+        }
+        return Math.floor(value).toLocaleString('vi-VN');
+      }
+
+      const money = value => number(value) + ' ₫';
+      const price = index => Math.round(ITEMS[index].p * Math.pow(1.3, state.o[index] || 0));
+
+      function readState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+          state = saved && typeof saved === 'object' ? {
+            m: Number(saved.m) || 0,
+            e: Number(saved.e) || 0,
+            s: Number(saved.s) || 0,
+            o: Array.isArray(saved.o) ? saved.o.map(value => Number(value) || 0) : []
+          } : { m: 0, e: 0, s: 0, o: [] };
+        } catch (error) {
+          state = { m: 0, e: 0, s: 0, o: [] };
+        }
+      }
+
+      function renderFilters() {
+        filters.innerHTML = categories.map(category => `<button class="filter" type="button" aria-pressed="${filter === category}" data-category="${category}">${category}</button>`).join('');
+        filters.addEventListener('click', event => {
+          const button = event.target.closest('[data-category]');
+          if (!button) return;
+          filter = button.dataset.category;
+          renderFilters();
+          renderItems();
+        }, { once: true });
+      }
+
+      function renderItems() {
+        const visible = ITEMS.map((item, index) => ({ ...item, index })).filter(item => filter === 'Tất cả' || item.c === filter);
+        catalog.innerHTML = visible.map(item => {
+          const owned = state.o[item.index] || 0;
+          const cost = price(item.index);
+          const affordable = state.m >= cost;
+          return `<article class="item">
+            <div class="item-top"><span class="item-icon" aria-hidden="true">${item.e}</span><span class="owned" aria-label="Đang sở hữu ${owned} món">×${owned}</span></div>
+            <p class="item-category">${item.c}</p>
+            <h3>${item.n}</h3>
+            <p class="item-desc">${item.d}</p>
+            <div class="item-bottom"><span class="price">${money(cost)}<small>${owned ? 'Giá món tiếp theo' : 'Giá khởi điểm'}</small></span>
+            <button class="buy" type="button" data-buy="${item.index}" ${affordable ? '' : 'disabled'}>${affordable ? 'Mua ngay' : 'Chưa đủ'}</button></div>
+          </article>`;
+        }).join('');
+        catalog.querySelectorAll('[data-buy]').forEach(button => button.addEventListener('click', () => buy(Number(button.dataset.buy))));
+      }
+
+      function render() {
+        balance.textContent = money(state.m);
+        spent.textContent = money(state.s);
+        const total = state.o.reduce((sum, count) => sum + count, 0);
+        collection.textContent = `${total} món đã sở hữu`;
+        renderItems();
+      }
+
+      function announce(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+      }
+
+      function buy(index) {
+        const cost = price(index);
+        if (state.m < cost) return;
+        state.m -= cost;
+        state.s += cost;
+        state.o[index] = (state.o[index] || 0) + 1;
+        try {
+          localStorage.setItem(KEY, JSON.stringify(state));
+        } catch (error) {
+          announce('Không thể lưu dữ liệu trên thiết bị này.');
+          readState();
+          render();
+          return;
+        }
+        render();
+        announce(`Đã thêm ${ITEMS[index].n} vào bộ sưu tập.`);
+      }
+
+      window.addEventListener('storage', event => {
+        if (event.key !== KEY) return;
+        readState();
+        render();
+      });
+
+      readState();
+      renderFilters();
+      render();
+    })();
+  </script>
+</body>
+</html>
