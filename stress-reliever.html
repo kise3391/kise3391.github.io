@@ -28,6 +28,8 @@
  canvas {
   position:fixed;
   inset:0;
+  width:100%;
+  height:100%;
   cursor:crosshair
 }
  #top {
@@ -152,7 +154,7 @@ const cv=$('c'),ctx=cv.getContext('2d'),oc=document.createElement('canvas');
 oc.width=280;
 oc.height=540;
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let W,H,K,fs,D,stress=100,combo=0,comboT=0,shake=0,flash=0,ans=null,hand=1,mode='jab',T=0,P=[],tp={
+let W,H,K,fs,D,stress=100,combo=0,comboT=0,shake=0,shakeX=0,shakeY=0,shakeDirX=0,shakeDirY=0,flash=0,ans=null,hand=1,mode='jab',T=0,P=[],tp={
   x:innerWidth/2,y:innerHeight*.5
 },round=0;
 const rr=(g,x,y,w,h,r)=>{
@@ -394,7 +396,7 @@ function drawD(){
 }
 const ang=()=>D.a+Math.sin(T*1.4)*.012,BY=()=>H*.88;
 function loc(x,y){
-  const X=x-(W/2+D.dx*K),Y=y-BY(),c=Math.cos(-ang()),s=Math.sin(-ang()),z=K*D.zs;
+  const X=x-shakeX-(W/2+D.dx*K),Y=y-shakeY-BY(),c=Math.cos(-ang()),s=Math.sin(-ang()),z=K*D.zs;
   return[(X*c-Y*s)/z,(X*s+Y*c)/z]
 }
 const inside=(u,v)=>Math.hypot(u,v+455)<62||(v>-405&&v<0&&(v<-190?Math.abs(u)<124:Math.abs(u)<68));
@@ -428,6 +430,8 @@ function impact(a){
   D.zv-=pw*.6;
   D.hurt=.4;
   shake=8+pw*10;
+  shakeDirX=R(-.5,.5);
+  shakeDirY=R(-.5,.5);
   flash=.5;
   if(v<-395)D.hh=Math.min(8,D.hh+1);
   const m=(t,r)=>D.marks.push({
@@ -618,6 +622,8 @@ function step(dt){
     D.st=R(4,7)
   }
   shake=Math.max(0,shake-dt*45);
+  shakeX=RM?0:shakeDirX*shake;
+  shakeY=RM?0:shakeDirY*shake;
   flash=Math.max(0,flash-dt*3);
   if(comboT>0&&(comboT-=dt)<=0&&combo){
     combo=0;
@@ -642,7 +648,7 @@ function step(dt){
 }
 function draw(){
   ctx.save();
-  if(shake>0&&!RM)ctx.translate(R(-.5,.5)*shake,R(-.5,.5)*shake);
+  ctx.translate(shakeX,shakeY);
   bg();
   const bx=W/2+D.dx*K,by=BY();
   ctx.fillStyle='rgba(0,0,0,.35)';
@@ -669,6 +675,7 @@ function draw(){
     ctx.textBaseline='middle';
     ctx.fillText(D.say,x,y+17)
   }
+  ctx.translate(-shakeX,-shakeY);
   for(const q of P){
     ctx.save();
     ctx.globalAlpha=Math.min(1,q.l*2);
