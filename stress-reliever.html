@@ -138,6 +138,111 @@
   color:#1d2433;
   border-color:#1d2433
 }
+@media(max-width:600px), (max-width:900px) and (max-height:500px) {
+  #top {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"status actions" "combo actions";
+    gap:6px 8px;
+    padding:calc(10px + env(safe-area-inset-top,0px)) 12px 0
+  }
+  #top > .note:first-child {
+    grid-area:status;
+    justify-self:start;
+    padding:7px 10px;
+    font-size:12px
+  }
+  .bar {
+    width:min(36vw,172px);
+    height:10px
+  }
+  #top #cb {
+    grid-area:combo;
+    justify-self:start;
+    padding:6px 10px;
+    font-size:12px
+  }
+  #top .r {
+    grid-area:actions;
+    align-self:start;
+    gap:6px
+  }
+  #top button {
+    min-height:44px;
+    padding:8px 10px
+  }
+  #top #mute {
+    width:44px;
+    padding:8px
+  }
+  #ctl {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+    padding:0 12px calc(10px + env(safe-area-inset-bottom,0px))
+  }
+  #ctl button {
+    min-width:0;
+    min-height:48px;
+    padding:8px 4px;
+    font-size:12px;
+    white-space:nowrap
+  }
+  #ctl button small {
+    display:none
+  }
+  #hint {
+    bottom:calc(74px + env(safe-area-inset-bottom,0px));
+    font-size:12px
+  }
+  #end {
+    top:calc(120px + env(safe-area-inset-top,0px))
+  }
+}
+@media(max-width:360px) {
+  #ctl {
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  #hint {
+    bottom:calc(126px + env(safe-area-inset-bottom,0px))
+  }
+}
+@media(max-width:900px) and (max-height:500px) {
+  #top {
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding-top:calc(6px + env(safe-area-inset-top,0px));
+    padding-left:8px;
+    padding-right:8px
+  }
+  #top > .note:first-child {
+    padding:5px 8px
+  }
+  .bar {
+    width:min(22vw,145px);
+    height:8px
+  }
+  #top #cb {
+    padding:4px 8px
+  }
+  #top button {
+    min-height:44px;
+    padding:6px 8px
+  }
+  #ctl {
+    display:flex;
+    justify-content:center;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))
+  }
+  #ctl button {
+    min-width:44px;
+    min-height:44px
+  }
+  #hint {
+    display:none
+  }
+}
 </style>
 </head>
 <body>
