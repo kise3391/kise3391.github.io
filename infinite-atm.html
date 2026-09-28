@@ -272,7 +272,10 @@ button:focus-visible {
     <button id="mute" aria-label="Bật tắt âm thanh">🔊</button>
     <div id="combo"></div>
     <div id="toast"></div>
-    <div id="hint" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;pointer-events:none">
+    <div id="ctl">
+      <div id="chips" role="group" aria-label="Mốc số tiền rút"></div>
+    </div>
+    <div id="hint" style="position:absolute;bottom:50px;left:0;right:0;text-align:center;pointer-events:none">
       Bấm số trên ATM rồi RÚT; ghé cửa hàng xa xỉ để tiêu tiền.
     </div>
   </div>
@@ -431,6 +434,24 @@ function rr(x,y,w,h,r){cx.beginPath();if(cx.roundRect)cx.roundRect(x,y,w,h,r);el
 const FONT='"Baloo 2",system-ui,sans-serif',EMO='"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
 let buf='',lastAmt=0,pressK=null,pressT=0;
 const grp=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const chips=$('chips');
+AM.forEach(amount=>{
+  const chip=document.createElement('button');
+  chip.type='button';
+  chip.className='chip';
+  chip.textContent=num(amount);
+  chip.setAttribute('aria-label','Điền '+fmt(amount));
+  chip.setAttribute('aria-pressed','false');
+  chip.addEventListener('click',()=>{
+    buf=String(amount);
+    chips.querySelectorAll('.chip').forEach(item=>{
+      const selected=item===chip;
+      item.classList.toggle('on',selected);
+      item.setAttribute('aria-pressed',String(selected));
+    });
+  });
+  chips.appendChild(chip);
+});
 function scr(now){if(msg.t>0)return[msg.a,msg.b,''];if(glow>.05)return['ĐANG ĐẾM TIỀN...','+'+num(lastAmt)+' ₫','VUI LÒNG CHỜ'];const a=Number(buf||0);return['NHẬP SỐ TIỀN CẦN RÚT',buf?grp(buf)+' ₫':((now/500|0)%2?'_':' '),a>=1e6?'= '+fmt(a):'SỐ DƯ: ∞']}
 function keys(){const{ax,ay,aw}=L,u=aw/100,k=[];
   ['1','2','3','4','5','6','7','8','9','000','0','00'].forEach((d,i)=>k.push({v:d,t:d,c:'#6d6299',x:ax+(10+(i%3)*17)*u,y:ay+(68+((i/3)|0)*11)*u,w:15*u,h:9*u}));
@@ -508,8 +529,9 @@ function frame(now){const dt=Math.min(2,(now-last)/16.667);last=now;update(dt,no
 function refresh(){$('stat').textContent='Đã rút '+fmt(earned)+' · Đã tiêu '+fmt(spent)}
 function press(v){initAudio();pressK=v;pressT=performance.now();
   if(v==='E'){const a=Number(buf||0);if(!(a>0)){msg={a:'SỐ TIỀN KHÔNG',b:'HỢP LỆ',t:1200};sh=Math.max(sh,6);if(AC){const t=AC.currentTime;tone(160,t,.25,'square',.12);tone(120,t+.12,.25,'square',.12)}return}withdraw(a);return}
-  if(v==='C'){buf='';if(AC)tone(300,AC.currentTime,.15,'sawtooth',.08,180);return}
-  if(v==='B'){buf=buf.slice(0,-1);if(AC)tone(700,AC.currentTime,.06,'square',.06);return}
+  if(v==='C'){buf='';chips.querySelectorAll('.chip').forEach(item=>{item.classList.remove('on');item.setAttribute('aria-pressed','false')});if(AC)tone(300,AC.currentTime,.15,'sawtooth',.08,180);return}
+  if(v==='B'){buf=buf.slice(0,-1);chips.querySelectorAll('.chip').forEach(item=>{item.classList.remove('on');item.setAttribute('aria-pressed','false')});if(AC)tone(700,AC.currentTime,.06,'square',.06);return}
+  chips.querySelectorAll('.chip').forEach(item=>{item.classList.remove('on');item.setAttribute('aria-pressed','false')});
   buf=(buf+v).replace(/^0+/,'');if(buf.length>22)buf=buf.slice(0,22);
   if(AC){const t=AC.currentTime,f=700+(+v[0])*70;tone(f,t,.07,'square',.06);tone(f*1.5,t+.02,.05,'sine',.04)}}
 let hold=null;
@@ -518,7 +540,7 @@ cv.addEventListener('pointerdown',e=>{const k=hit(e);if(!k)return;e.preventDefau
 cv.addEventListener('pointermove',e=>{cv.style.cursor=hit(e)?'pointer':'default'});
 cv.addEventListener('pointerleave',()=>clearInterval(hold));
 addEventListener('pointerup',()=>clearInterval(hold));addEventListener('pointercancel',()=>clearInterval(hold));
-addEventListener('keydown',e=>{let v=null;if(/^[0-9]$/.test(e.key))v=e.key;else if(e.key==='Backspace')v='B';else if(e.key==='Delete'||e.key==='Escape')v='C';else if(e.key==='Enter'||e.code==='Space')v='E';if(!v)return;e.preventDefault();if(v==='E'&&e.repeat&&performance.now()-lastW<120)return;press(v)});
+addEventListener('keydown',e=>{if(e.target instanceof Element&&e.target.closest('button,a,input,select,textarea'))return;let v=null;if(/^[0-9]$/.test(e.key))v=e.key;else if(e.key==='Backspace')v='B';else if(e.key==='Delete'||e.key==='Escape')v='C';else if(e.key==='Enter'||e.code==='Space')v='E';if(!v)return;e.preventDefault();if(v==='E'&&e.repeat&&performance.now()-lastW<120)return;press(v)});
 $('mute').onclick=()=>{muted=!muted;if(master)master.gain.value=muted?0:.6;$('mute').textContent=muted?'🔇':'🔊'};
 addEventListener('storage',e=>{
   if(e.key!==KEY||!e.newValue)return;
