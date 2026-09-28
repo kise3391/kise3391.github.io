@@ -1,380 +1,545 @@
 <!DOCTYPE html>
-<html lang="vi"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Phòng Xả Stress</title>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px)
-}
- html {
-  scroll-padding-top:env(safe-area-inset-top,0px)
-}
- html,body {
-  height:100%;
-  margin:0;
-  background:#1d2433;
-  overflow:hidden;
-  font-family:'Be Vietnam Pro',system-ui,sans-serif;
-  touch-action:none;
-  user-select:none;
-  -webkit-user-select:none
-}
- [hidden] {
-  display:none!important
-}
- canvas {
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  cursor:crosshair
-}
- #top {
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  padding:calc(10px + env(safe-area-inset-top,0px)) 10px 0;
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  pointer-events:none
-}
- .note {
-  background:#ffe66d;
-  color:#2b2110;
-  padding:8px 12px;
-  box-shadow:0 3px 0 rgba(0,0,0,.3);
-  transform:rotate(-1.2deg);
-  font-weight:800;
-  font-size:13px
-}
- .bar {
-  height:12px;
-  background:#fff9;
-  border:2px solid #2b2110;
-  margin:4px 0;
-  width:min(42vw,230px)
-}
- #fill {
-  display:block;
-  height:100%;
-  width:100%;
-  background:#e5383b;
-  transition:width .2s
-}
- #top .r {
-  margin-left:auto;
-  display:flex;
-  gap:8px;
-  pointer-events:auto
-}
- button {
-  font:800 14px 'Be Vietnam Pro',system-ui,sans-serif;
-  background:#1d2433;
-  color:#fff8e7;
-  border:2px solid #fff8e7;
-  border-radius:10px;
-  padding:9px 13px;
-  cursor:pointer
-}
- button small {
-  opacity:.7;
-  font-weight:500;
-  margin-left:4px
-}
- button.on {
-  background:#ff5a36;
-  color:#1d2433;
-  border-color:#ff5a36
-}
- #ctl {
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  padding:0 8px calc(8px + env(safe-area-inset-bottom,0px));
-  display:flex;
-  gap:8px;
-  justify-content:center;
-  flex-wrap:wrap
-}
- #hint {
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:calc(64px + env(safe-area-inset-bottom,0px));
-  text-align:center;
-  color:#fff8e7;
-  font-size:13px;
-  text-shadow:0 1px 3px #000;
-  pointer-events:none;
-  transition:opacity .6s;
-  padding:0 12px
-}
- #end {
-  position:fixed;
-  top:calc(96px + env(safe-area-inset-top,0px));
-  left:50%;
-  transform:translateX(-50%);
-  background:#fff8e7;
-  color:#1d2433;
-  border:3px solid #1d2433;
-  border-radius:14px;
-  padding:12px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  align-items:center;
-  text-align:center;
-  max-width:86vw;
-  box-shadow:0 6px 0 rgba(0,0,0,.35)
-}
- #end button {
-  background:#ff5a36;
-  color:#1d2433;
-  border-color:#1d2433
-}
-@media(max-width:600px), (max-width:900px) and (max-height:500px) {
-  #top {
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    grid-template-areas:"status actions" "combo actions";
-    gap:6px 8px;
-    padding:calc(10px + env(safe-area-inset-top,0px)) 12px 0
-  }
-  #top > .note:first-child {
-    grid-area:status;
-    justify-self:start;
-    padding:7px 10px;
-    font-size:12px
-  }
-  .bar {
-    width:min(36vw,172px);
-    height:10px
-  }
-  #top #cb {
-    grid-area:combo;
-    justify-self:start;
-    padding:6px 10px;
-    font-size:12px
-  }
-  #top .r {
-    grid-area:actions;
-    align-self:start;
-    gap:6px
-  }
-  #top button {
-    min-height:44px;
-    padding:8px 10px
-  }
-  #top #mute {
-    width:44px;
-    padding:8px
-  }
-  #ctl {
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:8px;
-    padding:0 12px calc(10px + env(safe-area-inset-bottom,0px))
-  }
-  #ctl button {
-    min-width:0;
-    min-height:48px;
-    padding:8px 4px;
-    font-size:12px;
-    white-space:nowrap
-  }
-  #ctl button small {
-    display:none
-  }
-  #hint {
-    bottom:calc(74px + env(safe-area-inset-bottom,0px));
-    font-size:12px
-  }
-  #end {
-    top:calc(120px + env(safe-area-inset-top,0px))
-  }
-}
-@media(max-width:360px) {
-  #ctl {
-    grid-template-columns:repeat(2,minmax(0,1fr))
-  }
-  #hint {
-    bottom:calc(126px + env(safe-area-inset-bottom,0px))
-  }
-}
-@media(max-width:900px) and (max-height:500px) {
-  #top {
-    display:flex;
-    align-items:flex-start;
-    gap:8px;
-    padding-top:calc(6px + env(safe-area-inset-top,0px));
-    padding-left:8px;
-    padding-right:8px
-  }
-  #top > .note:first-child {
-    padding:5px 8px
-  }
-  .bar {
-    width:min(22vw,145px);
-    height:8px
-  }
-  #top #cb {
-    padding:4px 8px
-  }
-  #top button {
-    min-height:44px;
-    padding:6px 8px
-  }
-  #ctl {
-    display:flex;
-    justify-content:center;
-    padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))
-  }
-  #ctl button {
-    min-width:44px;
-    min-height:44px
-  }
-  #hint {
-    display:none
-  }
-}
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Phòng Xả Stress</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: #1d2433;
+      overflow: hidden;
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    #top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+
+    .note {
+      background: #ffe66d;
+      color: #2b2110;
+      padding: 8px 12px;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+      transform: rotate(-1.2deg);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 12px;
+      background: #fff9;
+      border: 2px solid #2b2110;
+      margin: 4px 0;
+      width: min(42vw, 230px);
+    }
+
+    #fill {
+      display: block;
+      height: 100%;
+      width: 100%;
+      background: #e5383b;
+      transition: width .2s;
+    }
+
+    #top .r {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    button {
+      font: 800 14px 'Be Vietnam Pro', system-ui, sans-serif;
+      background: #1d2433;
+      color: #fff8e7;
+      border: 2px solid #fff8e7;
+      border-radius: 10px;
+      padding: 9px 13px;
+      cursor: pointer;
+    }
+
+    button small {
+      opacity: .7;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    button.on {
+      background: #ff5a36;
+      color: #1d2433;
+      border-color: #ff5a36;
+    }
+
+    #ctl {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 8px calc(8px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    #hint {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+      text-align: center;
+      color: #fff8e7;
+      font-size: 13px;
+      text-shadow: 0 1px 3px #000;
+      pointer-events: none;
+      transition: opacity .6s;
+      padding: 0 12px;
+    }
+
+    #end {
+      position: fixed;
+      top: calc(96px + env(safe-area-inset-top, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff8e7;
+      color: #1d2433;
+      border: 3px solid #1d2433;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      text-align: center;
+      max-width: 86vw;
+      box-shadow: 0 6px 0 rgba(0, 0, 0, .35);
+    }
+
+    #end button {
+      background: #ff5a36;
+      color: #1d2433;
+      border-color: #1d2433;
+    }
+    @media (max-width: 600px), (max-width: 900px) and (max-height: 500px) {
+      #top {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "status actions" "combo actions";
+        gap: 6px 8px;
+        padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 0;
+      }
+
+      #top > .note:first-child {
+        grid-area: status;
+        justify-self: start;
+        padding: 7px 10px;
+        font-size: 12px;
+      }
+
+      .bar {
+        width: min(36vw, 172px);
+        height: 10px;
+      }
+
+      #top #cb {
+        grid-area: combo;
+        justify-self: start;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      #top .r {
+        grid-area: actions;
+        align-self: start;
+        gap: 6px;
+      }
+
+      #top button {
+        min-height: 44px;
+        padding: 8px 10px;
+      }
+
+      #top #mute {
+        width: 44px;
+        padding: 8px;
+      }
+
+      #ctl {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      }
+
+      #ctl button {
+        min-width: 0;
+        min-height: 48px;
+        padding: 8px 4px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      #ctl button small {
+        display: none;
+      }
+
+      #hint {
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+        font-size: 12px;
+      }
+
+      #end {
+        top: calc(120px + env(safe-area-inset-top, 0px));
+      }
+    }
+
+    @media (max-width: 360px) {
+      #ctl {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #hint {
+        bottom: calc(126px + env(safe-area-inset-bottom, 0px));
+      }
+    }
+
+    @media (max-width: 900px) and (max-height: 500px) {
+      #top {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding-top: calc(6px + env(safe-area-inset-top, 0px));
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      #top > .note:first-child {
+        padding: 5px 8px;
+      }
+
+      .bar {
+        width: min(22vw, 145px);
+        height: 8px;
+      }
+
+      #top #cb {
+        padding: 4px 8px;
+      }
+
+      #top button {
+        min-height: 44px;
+        padding: 6px 8px;
+      }
+
+      #ctl {
+        display: flex;
+        justify-content: center;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+      }
+
+      #ctl button {
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      #hint {
+        display: none;
+      }
+    }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="top"><div class="note"><div>Mức stress của bạn</div><div class="bar"><i id="fill"></i></div><span id="pct">100%</span></div>
-<div class="note" id="cb">Combo x0</div>
-<div class="r"><button id="mute" aria-label="Bật/tắt âm thanh">🔊</button><button id="reset">Sếp mới</button></div></div>
-<div id="hint">Rê chuột để ngắm, nhấp để ra đòn. Chuột phải: vả. Phím J, K, L, Space.</div>
-<div id="end" hidden><b>Xả stress xong! 🎉</b><span>Hít thở sâu, uống ngụm nước rồi quay lại làm việc nhé.</span><button id="again">Sếp mới</button></div>
-<div id="ctl"><button data-a="jab" class="on">Đấm <small>J</small></button><button data-a="slap">Vả <small>K</small></button><button data-a="kick">Đạp <small>Space</small></button><button data-a="up">Móc hàm <small>L</small></button></div>
-<script>
-const $=id=>document.getElementById(id),R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.random()*a.length|0],lerp=(a,b,t)=>a+(b-a)*t;
-const cv=$('c'),ctx=cv.getContext('2d'),oc=document.createElement('canvas');
-oc.width=280;
-oc.height=540;
-const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let W,H,K,fs,D,stress=100,combo=0,comboT=0,shake=0,shakeX=0,shakeY=0,shakeDirX=0,shakeDirY=0,flash=0,ans=null,hand=1,mode='jab',T=0,P=[],tp={
-  x:innerWidth/2,y:innerHeight*.5
-},round=0;
-const rr=(g,x,y,w,h,r)=>{
-  g.beginPath();
-  g.roundRect(x,y,w,h,r);
-  g.fill()
-};
-const el=(g,x,y,rx,ry)=>{
-  g.beginPath();
-  g.ellipse(x,y,rx,ry,0,0,7);
-  g.fill()
-};
-function rs(){
-  const d=devicePixelRatio||1;
-  W=innerWidth;
-  H=innerHeight;
-  cv.width=W*d;
-  cv.height=H*d;
-  ctx.setTransform(d,0,0,d,0,0);
-  K=Math.min(H*.62/520,W*.8/300);
-  fs=Math.min(1.2,Math.max(.6,H/700))
-}
-addEventListener('resize',rs);
-rs();
-/* ---- âm thanh ---- */let AC,muted=false;
-function au(){
-  if(!AC){
-    try{
-      AC=new(window.AudioContext||window.webkitAudioContext)()
+    <canvas id="c"></canvas>
+    <div id="top">
+      <div class="note">
+        <div>Mức stress của bạn</div>
+        <div class="bar"><i id="fill"></i></div>
+        <span id="pct">100%</span>
+      </div>
+      <div class="note" id="cb">Combo x0</div>
+      <div class="r">
+        <button id="mute" aria-label="Bật/tắt âm thanh">🔊</button>
+        <button id="reset">Sếp mới</button>
+      </div>
+    </div>
+    <div id="hint">Rê chuột để ngắm, nhấp để ra đòn. Chuột phải: vả. Phím J, K, L, Space.</div>
+    <div id="end" hidden>
+      <b>Xả stress xong! 🎉</b>
+      <span>Hít thở sâu, uống ngụm nước rồi quay lại làm việc nhé.</span>
+      <button id="again">Sếp mới</button>
+    </div>
+    <div id="ctl">
+      <button data-a="jab" class="on">Đấm <small>J</small></button>
+      <button data-a="slap">Vả <small>K</small></button>
+      <button data-a="kick">Đạp <small>Space</small></button>
+      <button data-a="up">Móc hàm <small>L</small></button>
+    </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const R = (a, b) => a + Math.random() * (b - a);
+    const pick = (items) => items[Math.random() * items.length | 0];
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    const cv = $('c');
+    const ctx = cv.getContext('2d');
+    const oc = document.createElement('canvas');
+    oc.width = 280;
+    oc.height = 540;
+
+    const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W, H, K, fs, D;
+    let stress = 100;
+    let combo = 0;
+    let comboT = 0;
+    let shake = 0;
+    let shakeX = 0;
+    let shakeY = 0;
+    let shakeDirX = 0;
+    let shakeDirY = 0;
+    let flash = 0;
+    let ans = null;
+    let hand = 1;
+    let mode = 'jab';
+    let T = 0;
+    let P = [];
+    let props = [];
+    let tp = {
+      x: innerWidth / 2,
+      y: innerHeight * .5,
+    };
+    let round = 0;
+
+    const rr = (g, x, y, w, h, r) => {
+      g.beginPath();
+      g.roundRect(x, y, w, h, r);
+      g.fill();
+    };
+
+    const el = (g, x, y, rx, ry) => {
+      g.beginPath();
+      g.ellipse(x, y, rx, ry, 0, 0, 7);
+      g.fill();
+    };
+    function rs() {
+      const d = devicePixelRatio || 1;
+      W = innerWidth;
+      H = innerHeight;
+      cv.width = W * d;
+      cv.height = H * d;
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+      K = Math.min(H * .62 / 520, W * .8 / 300);
+      fs = Math.min(1.2, Math.max(.6, H / 700));
     }
-    catch(e){
+    addEventListener('resize', rs);
+    rs();
+
+    /* ---- âm thanh ---- */
+    let AC;
+    let muted = false;
+
+    function au() {
+      if (!AC) {
+        try {
+          AC = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {}
+      }
+
+      if (AC && AC.state == 'suspended') AC.resume();
+      return AC;
     }
-  }
-  if(AC&&AC.state=='suspended')AC.resume();
-  return AC
-}
-function tone(f,f2,d,ty,v){
-  if(!AC||muted)return;
-  const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();
-  o.type=ty;
-  o.frequency.setValueAtTime(f,t);
-  o.frequency.exponentialRampToValueAtTime(Math.max(1,f2),t+d);
-  g.gain.setValueAtTime(v,t);
-  g.gain.exponentialRampToValueAtTime(.001,t+d);
-  o.connect(g).connect(AC.destination);
-  o.start();
-  o.stop(t+d)
-}
-function nz(d,f,v,ty){
-  if(!AC||muted)return;
-  const t=AC.currentTime,n=AC.sampleRate*d|0,b=AC.createBuffer(1,n,AC.sampleRate),c=b.getChannelData(0);
-  for(let i=0;i<n;i++)c[i]=Math.random()*2-1;
-  const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();
-  s.buffer=b;
-  fl.type=ty;
-  fl.frequency.value=f;
-  g.gain.setValueAtTime(v,t);
-  g.gain.exponentialRampToValueAtTime(.001,t+d);
-  s.connect(fl).connect(g).connect(AC.destination);
-  s.start()
-}
-const SND={
-  punch(){
-    tone(150,40,.2,'sine',1);
-    nz(.09,1000,.6,'lowpass')
-  }  ,slap(){
-    nz(.14,2500,1,'highpass');
-    tone(700,200,.07,'square',.12)
-  }  ,kick(){
-    tone(100,28,.34,'sine',1.2);
-    nz(.18,600,.9,'lowpass')
-  }  ,upper(){
-    tone(190,55,.26,'triangle',1);
-    nz(.1,1400,.6,'lowpass')
-  }  ,whoosh(){
-    nz(.16,900,.18,'bandpass')
-  }  ,ouch(){
-    tone(420,260,.16,'sawtooth',.07)
-  }  ,win(){
-    [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,f,.25,'triangle',.25),i*120))
-  }
-};
-const snd=k=>{
-  if(au()&&SND[k])SND[k]()
-};
-/* ---- dữ liệu ---- */const A={
-  jab:{
-    dmg:5,d:.34,s:'punch',h:1,w:['Hủy họp!','Reply All!','Từ chối OT!','KPI ơi!']
-  }  ,slap:{
-    dmg:4,d:.32,s:'slap',h:1,w:['Chát! Feedback!','Đánh giá 1 sao!','Xin nghỉ phép!']
-  }  ,kick:{
-    dmg:9,d:.5,s:'kick',w:['Đá bay deadline!','Out meeting!','Sa thải task!']
-  }  ,up:{
-    dmg:7,d:.4,s:'upper',h:1,w:['Tăng lương!','Nghỉ cuối tuần!','Thưởng Tết!']
-  }
-};
-const N=['Cuối ngày gửi anh nhé!','Deadline là hôm qua đó.','Em làm lại giúp anh nhé.','Họp gấp 5 phút thôi!','Việc này "quick fix" thôi mà.'],Hh=['Ối… anh chỉ góp ý thôi mà!','Em bình tĩnh đã…','Anh duyệt tăng lương!','Không họp nữa, anh hứa!','Anh xin lỗi, anh sai rồi!'];
-function newD(){
-  round++;
-  ans=null;
-  P=[];
-  D={
-    a:0,av:0,dx:0,dv:0,zs:1,zv:0,marks:[],hurt:0,hh:0,ko:0,say:'Em ơi, gửi anh báo cáo nhé!',sayT:3,st:5
-  }  ;
-  stress=100;
-  combo=0;
-  ui();
-  $('end').hidden=true;
-}
-function ui(){
-  $('fill').style.width=stress+'%';
-  $('fill').style.background='hsl('+(120-stress*1.2)+' 70% 45%)';
-  $('pct').textContent=Math.round(stress)+'%';
-  $('cb').textContent='Combo x'+combo
-}
+
+    function tone(f, f2, d, ty, v) {
+      if (!AC || muted) return;
+
+      const t = AC.currentTime;
+      const o = AC.createOscillator();
+      const g = AC.createGain();
+      o.type = ty;
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(1, f2), t + d);
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + d);
+      o.connect(g).connect(AC.destination);
+      o.start();
+      o.stop(t + d);
+    }
+
+    function nz(d, f, v, ty) {
+      if (!AC || muted) return;
+
+      const t = AC.currentTime;
+      const n = AC.sampleRate * d | 0;
+      const b = AC.createBuffer(1, n, AC.sampleRate);
+      const c = b.getChannelData(0);
+      for (let i = 0; i < n; i++) c[i] = Math.random() * 2 - 1;
+
+      const s = AC.createBufferSource();
+      const fl = AC.createBiquadFilter();
+      const g = AC.createGain();
+      s.buffer = b;
+      fl.type = ty;
+      fl.frequency.value = f;
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + d);
+      s.connect(fl).connect(g).connect(AC.destination);
+      s.start();
+    }
+
+    const SND = {
+      punch() {
+        tone(150, 40, .2, 'sine', 1);
+        nz(.09, 1000, .6, 'lowpass');
+      },
+      slap() {
+        nz(.14, 2500, 1, 'highpass');
+        tone(700, 200, .07, 'square', .12);
+      },
+      kick() {
+        tone(100, 28, .34, 'sine', 1.2);
+        nz(.18, 600, .9, 'lowpass');
+      },
+      upper() {
+        tone(190, 55, .26, 'triangle', 1);
+        nz(.1, 1400, .6, 'lowpass');
+      },
+      whoosh() {
+        nz(.16, 900, .18, 'bandpass');
+      },
+      ouch() {
+        tone(420, 260, .16, 'sawtooth', .07);
+      },
+      win() {
+        [523, 659, 784, 1047].forEach((f, i) =>
+          setTimeout(() => tone(f, f, .25, 'triangle', .25), i * 120),
+        );
+      },
+    };
+
+    const snd = (key) => {
+      if (au() && SND[key]) SND[key]();
+    };
+
+    /* ---- dữ liệu ---- */
+    const A = {
+      jab: {
+        dmg: 5,
+        d: .34,
+        s: 'punch',
+        h: 1,
+        w: ['Hủy họp!', 'Reply All!', 'Từ chối OT!', 'KPI ơi!'],
+      },
+      slap: {
+        dmg: 4,
+        d: .32,
+        s: 'slap',
+        h: 1,
+        w: ['Chát! Feedback!', 'Đánh giá 1 sao!', 'Xin nghỉ phép!'],
+      },
+      kick: {
+        dmg: 9,
+        d: .5,
+        s: 'kick',
+        w: ['Đá bay deadline!', 'Out meeting!', 'Sa thải task!'],
+      },
+      up: {
+        dmg: 7,
+        d: .4,
+        s: 'upper',
+        h: 1,
+        w: ['Tăng lương!', 'Nghỉ cuối tuần!', 'Thưởng Tết!'],
+      },
+    };
+
+    const N = [
+      'Cuối ngày gửi anh nhé!',
+      'Deadline là hôm qua đó.',
+      'Em làm lại giúp anh nhé.',
+      'Họp gấp 5 phút thôi!',
+      'Việc này "quick fix" thôi mà.',
+    ];
+    const Hh = [
+      'Ối… anh chỉ góp ý thôi mà!',
+      'Em bình tĩnh đã…',
+      'Anh duyệt tăng lương!',
+      'Không họp nữa, anh hứa!',
+      'Anh xin lỗi, anh sai rồi!',
+    ];
+    function resetProps() {
+      props = [
+        { type: 'vase', timer: 0, tilt: 0 },
+        { type: 'cup', timer: 0 },
+      ];
+    }
+
+    function newD() {
+      round++;
+      ans = null;
+      P = [];
+      resetProps();
+      D = {
+        a: 0,
+        av: 0,
+        dx: 0,
+        dv: 0,
+        zs: 1,
+        zv: 0,
+        marks: [],
+        hurt: 0,
+        hh: 0,
+        ko: 0,
+        say: 'Em ơi, gửi anh báo cáo nhé!',
+        sayT: 3,
+        st: 5,
+      };
+      stress = 100;
+      combo = 0;
+      ui();
+      $('end').hidden = true;
+    }
+
+    function ui() {
+      $('fill').style.width = stress + '%';
+      $('fill').style.background = 'hsl(' + (120 - stress * 1.2) + ' 70% 45%)';
+      $('pct').textContent = Math.round(stress) + '%';
+      $('cb').textContent = 'Combo x' + combo;
+    }
 /* ---- hình nhân ---- */
 function mk(g,m){
   const a=Math.min(1,m.age*4),r=m.r;
@@ -499,12 +664,56 @@ function drawD(){
   for(const m of D.marks)mk(g,m);
   g.restore()
 }
-const ang=()=>D.a+Math.sin(T*1.4)*.012,BY=()=>H*.88;
-function loc(x,y){
-  const X=x-shakeX-(W/2+D.dx*K),Y=y-shakeY-BY(),c=Math.cos(-ang()),s=Math.sin(-ang()),z=K*D.zs;
-  return[(X*c-Y*s)/z,(X*s+Y*c)/z]
-}
-const inside=(u,v)=>Math.hypot(u,v+455)<62||(v>-405&&v<0&&(v<-190?Math.abs(u)<124:Math.abs(u)<68));
+    const ang = () => D.a + Math.sin(T * 1.4) * .012;
+    const BY = () => H * .88;
+
+    function loc(x, y) {
+      const X = x - shakeX - (W / 2 + D.dx * K);
+      const Y = y - shakeY - BY();
+      const c = Math.cos(-ang());
+      const s = Math.sin(-ang());
+      const z = K * D.zs;
+      return [(X * c - Y * s) / z, (X * s + Y * c) / z];
+    }
+
+    const inside = (u, v) =>
+      Math.hypot(u, v + 455) < 62 ||
+      (v > -405 && v < 0 && (v < -190 ? Math.abs(u) < 124 : Math.abs(u) < 68));
+
+    function propLayout(prop) {
+      const size = Math.max(20, Math.min(34, W * .075, H * .055));
+      const x = prop.type == 'vase' ? W * .14 : W * .86;
+      const base = H * .78;
+      return { x, base, size };
+    }
+
+    function hitProp(x, y, attack) {
+      const hitX = x - shakeX;
+      const hitY = y - shakeY;
+      for (const prop of props) {
+        const { x: px, base, size } = propLayout(prop);
+        if (Math.abs(hitX - px) > size * 1.25 || hitY < base - size * 2.8 || hitY > base + size * .2) continue;
+        if (prop.timer <= 0) {
+          prop.timer = 3;
+          if (prop.type == 'vase') {
+            prop.tilt = 1.25;
+          } else {
+            for (let i = 0; i < 8; i++) {
+              P.push({
+                t: 'glass', x, y, vx: R(-150, 150), vy: R(-250, -70),
+                l: R(.7, 1.2), r: R(0, 6), vr: R(-10, 10),
+              });
+            }
+          }
+          const d = A[attack.k];
+          snd(d.s);
+          fl(x, y - 24, prop.type == 'vase' ? 'Đổ rồi!' : 'Choang!', '#ffd23f');
+        }
+        return true;
+      }
+      return false;
+    }
+
 /* ---- hiệu ứng ---- */
 function fl(x,y,s,c){
   P.push({
@@ -521,6 +730,7 @@ function burst(x,y,n,pw){
 }
 function impact(a){
   const d=A[a.k],[u,v]=loc(a.px,a.py);
+  if(hitProp(a.px,a.py,a))return;
   if(!inside(u,v)){
     fl(a.px,a.py,'Trượt!','#dfe6ee');
     return;
@@ -558,24 +768,31 @@ function impact(a){
     D.ko=1;
     D.say='Anh… xin nghỉ phép…';
     D.sayT=6;
-    setTimeout(()=>{
-      if(winningRound!==round)return;			snd('win');			$('end').hidden=false;
-    }    ,700);
+    setTimeout(() => {
+      if (winningRound !== round) return;
+      snd('win');
+      $('end').hidden = false;
+    }, 700);
   }
 }
 function atk(k,px,py){
-  if(ans&&ans.t<.7)return;
+  if (ans && ans.t < .7) return;
   au();
-  $('hint').style.opacity=0;
-  if(px==null){
-    px=tp.x;
-    py=tp.y
+  $('hint').style.opacity = 0;
+  if (px == null) {
+    px = tp.x;
+    py = tp.y;
   }
-  hand=-hand;
-  ans={
-    k,t:0,px,py,side:hand,hit:0
-  }  ;
-  snd('whoosh')
+  hand = -hand;
+  ans = {
+    k,
+    t: 0,
+    px,
+    py,
+    side: hand,
+    hit: 0,
+  };
+  snd('whoosh');
 }
 /* ---- nắm đấm góc nhìn thứ nhất ---- */
 function arm(x,y,s,ax,col,cf){
@@ -708,6 +925,69 @@ function bg(){
     ctx.lineTo(W/2+i*W*.16,H)
   }
   ctx.stroke()
+  for (const prop of props) drawProp(prop);
+}
+function drawProp(prop){
+  const {x,base,size:r}=propLayout(prop);
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,.28)';
+  el(ctx,x,base+3,r*1.1,r*.2);
+  ctx.fillStyle='#252d3c';
+  ctx.fillRect(x-r*.8,base-r*.12,r*1.6,r*.12);
+  ctx.fillRect(x-r*.62,base,r*.12,r*.8);
+  ctx.fillRect(x+r*.5,base,r*.12,r*.8);
+  if(prop.timer>0&&prop.type=='cup'){
+    ctx.restore();
+    return;
+  }
+  if(prop.type=='vase'){
+    ctx.translate(x,base-r*.12);
+    ctx.rotate(prop.tilt);
+    ctx.fillStyle='#df704d';
+    ctx.strokeStyle='#743b37';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(-r*.28,0);
+    ctx.quadraticCurveTo(-r*.18,-r*.42,-r*.4,-r*.78);
+    ctx.lineTo(-r*.32,-r*1.18);
+    ctx.quadraticCurveTo(0,-r*1.08,r*.32,-r*1.18);
+    ctx.lineTo(r*.4,-r*.78);
+    ctx.quadraticCurveTo(r*.18,-r*.42,r*.28,0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle='#f4b36f';
+    ctx.fillRect(-r*.3,-r*1.18,r*.6,r*.1);
+    ctx.strokeStyle='#477a53';
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(0,-r*1.14);
+    ctx.lineTo(-r*.18,-r*1.65);
+    ctx.moveTo(0,-r*1.14);
+    ctx.lineTo(r*.2,-r*1.58);
+    ctx.stroke();
+    ctx.fillStyle='#68a66a';
+    el(ctx,-r*.2,-r*1.58,r*.14,r*.07);
+    el(ctx,r*.21,-r*1.51,r*.14,r*.07);
+  }else{
+    ctx.fillStyle='#d7eef0';
+    ctx.strokeStyle='#526a78';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(x-r*.35,base-r*.9);
+    ctx.lineTo(x+r*.35,base-r*.9);
+    ctx.lineTo(x+r*.25,base-r*.12);
+    ctx.quadraticCurveTo(x,base+r*.02,x-r*.25,base-r*.12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x+r*.35,base-r*.66,r*.22,-Math.PI/2,Math.PI/2);
+    ctx.stroke();
+    ctx.fillStyle='#8a5d43';
+    ctx.fillRect(x-r*.29,base-r*.69,r*.58,r*.08);
+  }
+  ctx.restore();
 }
 /* ---- vòng lặp ---- */
 function step(dt){
@@ -720,6 +1000,10 @@ function step(dt){
   D.hurt-=dt;
   D.sayT-=dt;
   D.st-=dt;
+  for(const prop of props){
+    if(prop.timer>0)prop.timer=Math.max(0,prop.timer-dt);
+    if(prop.type=='vase')prop.tilt=lerp(prop.tilt,prop.timer>0?1.25:0,Math.min(1,dt*7));
+  }
   for(const m of D.marks)m.age+=dt;
   if(D.st<0&&!D.ko){
     D.say=pick(stress>50?N:Hh);
@@ -806,6 +1090,16 @@ function draw(){
       ctx.font='20px sans-serif';
       ctx.fillText('★',0,0)
     }
+    else if(q.t=='glass'){
+      ctx.rotate(q.r);
+      ctx.fillStyle='#bde8e8';
+      ctx.beginPath();
+      ctx.moveTo(0,-8);
+      ctx.lineTo(6,5);
+      ctx.lineTo(-5,3);
+      ctx.closePath();
+      ctx.fill();
+    }
     else{
       ctx.rotate(q.r);
       ctx.fillStyle='#fff';
@@ -840,28 +1134,46 @@ cv.addEventListener('pointerdown',e=>{
   }  ;atk(e.button==2?'slap':mode,tp.x,tp.y)
 });
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-addEventListener('keydown',e=>{
-  if(e.repeat)return;const k={
-    j:'jab',k:'slap',l:'up',' ':'kick'
-  }
-  [e.key.toLowerCase()];if(k){
-    e.preventDefault();atk(k)
-  }
-});
-document.querySelectorAll('#ctl button').forEach(b=>b.onclick=()=>{
-  mode=b.dataset.a;document.querySelectorAll('#ctl button').forEach(x=>x.classList.toggle('on',x==b));atk(mode);b.blur()
-});
-$('mute').onclick=e=>{
-  muted=!muted;
-  e.target.textContent=muted?'🔇':'🔊';
-  e.target.blur()
-};
-$('reset').onclick=$('again').onclick=e=>{
-  newD();
-  e.target.blur()
-};
-newD();
-requestAnimationFrame(fr);
-</script>
+    addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+
+      const k = {
+        j: 'jab',
+        k: 'slap',
+        l: 'up',
+        ' ': 'kick',
+      }[e.key.toLowerCase()];
+
+      if (k) {
+        e.preventDefault();
+        atk(k);
+      }
+    });
+
+    document.querySelectorAll('#ctl button').forEach((button) => {
+      button.onclick = () => {
+        mode = button.dataset.a;
+        document.querySelectorAll('#ctl button').forEach((item) =>
+          item.classList.toggle('on', item == button),
+        );
+        atk(mode);
+        button.blur();
+      };
+    });
+
+    $('mute').onclick = (e) => {
+      muted = !muted;
+      e.target.textContent = muted ? '🔇' : '🔊';
+      e.target.blur();
+    };
+
+    $('reset').onclick = $('again').onclick = (e) => {
+      newD();
+      e.target.blur();
+    };
+
+    newD();
+    requestAnimationFrame(fr);
+  </script>
 </body>
 </html>
