@@ -38,6 +38,19 @@
       font-family: 'Be Vietnam Pro', sans-serif;
     }
 
+    body.is-urgent::after {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      border: 20px solid rgba(217, 79, 79, .9);
+      box-shadow:
+        inset 0 0 48px 24px rgba(217, 79, 79, .5),
+        inset 0 0 110px 64px rgba(217, 79, 79, .18);
+      content: '';
+      pointer-events: none;
+      animation: urgency-pulse .8s ease-in-out infinite alternate;
+    }
+
     button, a { font: inherit; }
     button { cursor: pointer; }
     [hidden] { display: none !important; }
@@ -344,6 +357,11 @@
     .summary-actions .primary { flex: 1; }
 
     @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes urgency-pulse { from { opacity: .55; } to { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.is-urgent::after { animation: none; }
+    }
 
     @media (max-width: 800px) {
       .game-layout { grid-template-columns: 1fr; }
@@ -484,7 +502,13 @@
       { name: 'Trung Hiếu', department: 'Bảo mật', avatar: '🧑‍💻', priority: 'KHẨN CẤP', title: 'Xin in mật khẩu hệ thống ra giấy để cất vào két.', detail: 'Đề xuất bổ sung: dán mật khẩu lên mặt trước két để không quên.', kind: 'risky' }
     ];
 
-    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false };
+    const employeeNames = [
+      'Minh Anh', 'Quốc Bảo', 'Thu Hà', 'Đức Long', 'Bảo Ngọc', 'Hoàng Nam',
+      'Khánh Linh', 'Tuấn Kiệt', 'Mai Phương', 'Anh Duy', 'Ngọc Trâm', 'Hải Đăng',
+      'Yến Nhi', 'Gia Huy', 'Thanh Vy', 'Vũ Hoàng', 'Tú Uyên', 'Trung Hiếu',
+      'Phương Linh', 'Nhật Minh', 'Khôi Nguyên', 'Thảo My', 'Đình Khang', 'Hồng Nhung'
+    ];
+    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false, lastEmployeeName: null, audioContext: null };
     const $ = (selector) => document.querySelector(selector);
     const views = { start: $('#start-view'), game: $('#game-view'), summary: $('#summary-view') };
 
@@ -503,12 +527,54 @@
       });
     }
 
+    function randomEmployeeName() {
+      const candidates = employeeNames.filter((name) => name !== state.lastEmployeeName);
+      state.lastEmployeeName = candidates[Math.floor(Math.random() * candidates.length)];
+      return state.lastEmployeeName;
+    }
+
+    function playUrgentAlarm() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+
+      try {
+        state.audioContext ??= new AudioContext();
+        const context = state.audioContext;
+        const play = () => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          const now = context.currentTime;
+          oscillator.type = 'square';
+          oscillator.frequency.setValueAtTime(880, now);
+          oscillator.frequency.setValueAtTime(660, now + .2);
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(.12, now + .02);
+          gain.gain.setValueAtTime(.12, now + .16);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + .2);
+          gain.gain.setValueAtTime(.0001, now + .2);
+          gain.gain.exponentialRampToValueAtTime(.12, now + .22);
+          gain.gain.setValueAtTime(.12, now + .36);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + .4);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(now);
+          oscillator.stop(now + .42);
+        };
+
+        if (context.state === 'suspended') context.resume().then(play).catch(() => {});
+        else play();
+      } catch {}
+    }
+
     function renderRequest() {
       const item = state.queue[state.current % state.queue.length];
       $('#queue-number').textContent = `YÊU CẦU ${String(state.results.length + 1).padStart(2, '0')}`;
       $('#priority').textContent = item.priority;
+      const isUrgent = item.priority === 'KHẨN CẤP';
+      document.body.classList.toggle('is-urgent', isUrgent);
+      if (isUrgent) playUrgentAlarm();
       $('#avatar').textContent = item.avatar;
-      $('#employee').textContent = item.name;
+      $('#employee').textContent = randomEmployeeName();
       $('#department').textContent = item.department;
       $('#request-title').textContent = item.title;
       $('#request-detail').textContent = item.detail;
@@ -536,6 +602,7 @@
       if (!state.running) return;
       state.running = false;
       clearInterval(state.timerId);
+      document.body.classList.remove('is-urgent');
       ['accepted', 'rejected', 'transferred'].forEach((type) => {
         $(`#summary-${type}`).textContent = state.results.filter((item) => item.decision === type).length;
       });
@@ -555,6 +622,7 @@
       state.seconds = 60;
       state.current = 0;
       state.results = [];
+      state.lastEmployeeName = null;
       state.queue = shuffledRequests();
       state.running = true;
       $('#timer-fill').style.background = 'var(--yellow)';
