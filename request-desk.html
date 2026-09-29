@@ -342,6 +342,7 @@
     .summary-head { margin-bottom: 28px; text-align: center; }
     .summary-head h1 { margin-bottom: 10px; }
     .summary-head p { margin: 0; color: var(--muted); }
+    .ending-image { display: block; width: min(100%, 280px); height: auto; aspect-ratio: 320 / 190; margin: 0 auto 14px; object-fit: contain; }
     .summary-card { padding: 25px; border: 2px solid var(--ink); border-radius: 18px; background: var(--white); box-shadow: 7px 7px 0 var(--ink); }
     .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 26px; }
     .summary-stat { padding: 17px; border-radius: 10px; }
@@ -481,6 +482,7 @@
         <div class="summary-head">
           <p class="kicker">Hết ca</p>
           <h1>Biên bản<br>một phút.</h1>
+          <img id="ending-image" class="ending-image" src="assets/request-desk/ending-balanced.svg" alt="Văn phòng cân bằng với hai bên bàn cân ngang nhau" width="320" height="190">
           <h2 id="ending-title" class="ending-title">Bộ máy cân bằng</h2>
           <p id="summary-message">Bạn đã sống sót qua một ca làm việc rất đặc biệt.</p>
         </div>
@@ -662,16 +664,18 @@
         && state.instability >= 40 && state.instability <= 60;
       let ending;
       if (isBalanced) {
-        ending = { title: 'Bộ máy cân bằng', message: 'Văn phòng giữ được nhịp ổn định: nhân viên hợp tác vừa đủ, không khí chưa đến mức báo động.' };
+        ending = { title: 'Bộ máy cân bằng', message: 'Văn phòng giữ được nhịp ổn định: nhân viên hợp tác vừa đủ, không khí chưa đến mức báo động.', image: 'assets/request-desk/ending-balanced.svg', alt: 'Văn phòng cân bằng với hai bên bàn cân ngang nhau' };
       } else if (state.obedience >= 50 && state.instability < 50) {
-        ending = { title: 'Văn phòng vào guồng', message: 'Mọi người phối hợp tốt và ca làm khép lại trong trật tự.' };
+        ending = { title: 'Văn phòng vào guồng', message: 'Mọi người phối hợp tốt và ca làm khép lại trong trật tự.', image: 'assets/request-desk/ending-in-sync.svg', alt: 'Hai đồng nghiệp cùng hoàn thành công việc bên bàn làm việc' };
       } else if (state.obedience >= 50 && state.instability >= 50) {
-        ending = { title: 'Đồng lòng trong hỗn loạn', message: 'Nhân viên vẫn nghe lời, nhưng cả văn phòng đang quay cuồng vì những quyết định hôm nay.' };
+        ending = { title: 'Đồng lòng trong hỗn loạn', message: 'Nhân viên vẫn nghe lời, nhưng cả văn phòng đang quay cuồng vì những quyết định hôm nay.', image: 'assets/request-desk/ending-chaos.svg', alt: 'Nhân viên vẫn làm việc giữa văn phòng ngổn ngang giấy tờ và chuông báo động' };
       } else if (state.obedience < 50 && state.instability < 50) {
-        ending = { title: 'Yên bình nhưng bất hợp tác', message: 'Không khí đã dịu xuống, nhưng nhân viên không còn mặn mà với các quyết định của bạn.' };
+        ending = { title: 'Yên bình nhưng bất hợp tác', message: 'Không khí đã dịu xuống, nhưng nhân viên không còn mặn mà với các quyết định của bạn.', image: 'assets/request-desk/ending-standoff.svg', alt: 'Hai đồng nghiệp khoanh tay quay lưng trong văn phòng yên tĩnh' };
       } else {
-        ending = { title: 'Khủng hoảng văn phòng', message: 'Bất ổn tăng cao trong khi sự hợp tác giảm xuống. Phòng Nhân sự sẽ cần một cuộc họp.' };
+        ending = { title: 'Khủng hoảng văn phòng', message: 'Bất ổn tăng cao trong khi sự hợp tác giảm xuống. Phòng Nhân sự sẽ cần một cuộc họp.', image: 'assets/request-desk/ending-crisis.svg', alt: 'Văn phòng hỗn loạn với giấy bay và đèn báo động đỏ' };
       }
+      $('#ending-image').src = ending.image;
+      $('#ending-image').alt = ending.alt;
       $('#ending-title').textContent = ending.title;
       $('#summary-message').textContent = `${ending.message} Bạn đã xử lý ${total} yêu cầu.`;
       $('#log-list').innerHTML = state.results.map((item) => {
