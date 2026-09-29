@@ -143,6 +143,7 @@
 
     .fortune span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
     .fortune strong { display: block; margin-top: 4px; color: var(--green); font-family: 'Playfair Display', Georgia, serif; font-size: 30px; }
+    .fortune-stat + .fortune-stat { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 
     .overview {
       display: flex;
@@ -218,6 +219,7 @@
 
     .price { color: var(--green); font-size: 12px; font-weight: 800; line-height: 1.35; }
     .price small { display: block; color: var(--muted); font-size: 10px; font-weight: 500; }
+    .maintenance-note { margin: 7px 0 0; color: var(--rose); font-size: 10px; font-weight: 700; line-height: 1.4; }
 
     .buy {
       flex: none;
@@ -269,8 +271,10 @@
       #balance { font-size: 13px; }
       .hero { grid-template-columns: 1fr; gap: 17px; margin-top: 28px; padding: 26px 0 22px; }
       h1 { max-width: 440px; font-size: 49px; }
-      .fortune { display: flex; align-items: baseline; gap: 9px; padding: 0; border: 0; text-align: left; }
-      .fortune strong { font-size: 25px; }
+      .fortune { display: grid; gap: 10px; min-width: 0; padding: 0; border: 0; text-align: left; }
+      .fortune-stat { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 9px; }
+      .fortune-stat + .fortune-stat { margin-top: 0; padding-top: 0; border-top: 0; }
+      .fortune strong { margin-top: 0; font-size: 25px; }
       .catalog { grid-template-columns: 1fr; gap: 10px; }
       .item { min-height: 210px; }
     }
@@ -296,7 +300,10 @@
         <h1 id="page-title">Thích gì,<br>mua nấy.</h1>
         <p class="hero-copy">Từ một món trang sức vượt thời gian đến hòn đảo chỉ có tên bạn trên bản đồ. Tiền từ ATM Vô Hạn đã sẵn sàng để biến mọi ý thích thành tài sản.</p>
       </div>
-      <div class="fortune"><span>ĐÃ TIÊU</span><strong id="spent">0 ₫</strong></div>
+      <div class="fortune">
+        <div class="fortune-stat"><span>ĐÃ TIÊU</span><strong id="spent">0 ₫</strong></div>
+        <div class="fortune-stat"><span>PHÍ DUY TRÌ / 30 NGÀY</span><strong id="maintenance-total">0 ₫</strong></div>
+      </div>
     </section>
 
     <section aria-labelledby="catalog-title">
@@ -313,6 +320,10 @@
   <script>
     (() => {
       const KEY = 'atmvohan_v1';
+      const MAINTENANCE_KEY = 'atmvohan_maintenance_v1';
+      const MAINTENANCE_INTERVAL = 30 * 24 * 60 * 60 * 1000;
+      const MAINTENANCE_THRESHOLD = 1e12;
+      const MAINTENANCE_RATE = .001;
       const ITEMS = [
         { e: '⌚', n: 'Đồng hồ cơ Thụy Sĩ', d: 'Bộ máy thủ công, truyền đời qua nhiều thế hệ.', p: 5e6, c: 'Đẳng cấp' },
         { e: '💎', n: 'Nhẫn kim cương 5 carat', d: 'Một viên đá đủ khiến mọi ánh nhìn dừng lại.', p: 4e8, c: 'Đẳng cấp' },
@@ -334,6 +345,7 @@
       let toastTimer;
       const balance = document.getElementById('balance');
       const spent = document.getElementById('spent');
+      const maintenanceTotalElement = document.getElementById('maintenance-total');
       const collection = document.getElementById('collection');
       const catalog = document.getElementById('catalog');
       const filters = document.getElementById('filters');
@@ -354,6 +366,47 @@
 
       const money = value => number(value) + ' ₫';
       const price = index => Math.round(ITEMS[index].p * Math.pow(1.3, state.o[index] || 0));
+      const maintenanceFee = index => ITEMS[index].p >= MAINTENANCE_THRESHOLD ? Math.ceil(ITEMS[index].p * MAINTENANCE_RATE) : 0;
+
+      function maintenanceTotal() {
+        return ITEMS.reduce((total, item, index) => total + maintenanceFee(index) * (state.o[index] || 0), 0);
+      }
+
+      function startMaintenanceCycle() {
+        if (!maintenanceTotal()) return;
+        try {
+          if (!Number(localStorage.getItem(MAINTENANCE_KEY))) {
+            localStorage.setItem(MAINTENANCE_KEY, String(Date.now() + MAINTENANCE_INTERVAL));
+          }
+        } catch (error) {}
+      }
+
+      function collectMaintenance() {
+        const amountPerPeriod = maintenanceTotal();
+        if (!amountPerPeriod) return null;
+
+        try {
+          let nextChargeAt = Number(localStorage.getItem(MAINTENANCE_KEY)) || 0;
+          if (!nextChargeAt) {
+            localStorage.setItem(MAINTENANCE_KEY, String(Date.now() + MAINTENANCE_INTERVAL));
+            return null;
+          }
+
+          const now = Date.now();
+          if (now < nextChargeAt) return null;
+
+          const periods = Math.floor((now - nextChargeAt) / MAINTENANCE_INTERVAL) + 1;
+          const amount = amountPerPeriod * periods;
+          state.m -= amount;
+          state.s += amount;
+          localStorage.setItem(KEY, JSON.stringify(state));
+          localStorage.setItem(MAINTENANCE_KEY, String(nextChargeAt + periods * MAINTENANCE_INTERVAL));
+          return { amount, periods };
+        } catch (error) {
+          readState();
+          return null;
+        }
+      }
 
       function readState() {
         try {
@@ -385,12 +438,14 @@
         catalog.innerHTML = visible.map(item => {
           const owned = state.o[item.index] || 0;
           const cost = price(item.index);
+          const upkeep = maintenanceFee(item.index);
           const affordable = state.m >= cost;
           return `<article class="item">
             <div class="item-top"><span class="item-icon" aria-hidden="true">${item.e}</span><span class="owned" aria-label="Đang sở hữu ${owned} món">×${owned}</span></div>
             <p class="item-category">${item.c}</p>
             <h3>${item.n}</h3>
             <p class="item-desc">${item.d}</p>
+            ${upkeep ? `<p class="maintenance-note">Phí duy trì / 30 ngày: ${money(upkeep)} mỗi món</p>` : ''}
             <div class="item-bottom"><span class="price">${money(cost)}<small>${owned ? 'Giá món tiếp theo' : 'Giá khởi điểm'}</small></span>
             <button class="buy" type="button" data-buy="${item.index}" ${affordable ? '' : 'disabled'}>${affordable ? 'Mua ngay' : 'Chưa đủ'}</button></div>
           </article>`;
@@ -401,6 +456,7 @@
       function render() {
         balance.textContent = money(state.m);
         spent.textContent = money(state.s);
+        maintenanceTotalElement.textContent = money(maintenanceTotal());
         const total = state.o.reduce((sum, count) => sum + count, 0);
         collection.textContent = `${total} món đã sở hữu`;
         renderItems();
@@ -427,8 +483,10 @@
           render();
           return;
         }
+        startMaintenanceCycle();
         render();
-        announce(`Đã thêm ${ITEMS[index].n} vào bộ sưu tập.`);
+        const upkeep = maintenanceFee(index);
+        announce(`Đã thêm ${ITEMS[index].n} vào bộ sưu tập.${upkeep ? ` Phí duy trì: ${money(upkeep)} mỗi 30 ngày.` : ''}`);
       }
 
       window.addEventListener('storage', event => {
@@ -438,8 +496,12 @@
       });
 
       readState();
+      const maintenanceReceipt = collectMaintenance();
       renderFilters();
       render();
+      if (maintenanceReceipt) {
+        announce(`Đã thu ${money(maintenanceReceipt.amount)} phí duy trì cho ${maintenanceReceipt.periods} kỳ.`);
+      }
     })();
   </script>
 </body>
