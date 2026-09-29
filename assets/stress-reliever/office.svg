@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1">
+      <stop stop-color="#dfe5e8"/>
+      <stop offset="1" stop-color="#b9c5cc"/>
+    </linearGradient>
+    <linearGradient id="floor" x2="0" y2="1">
+      <stop stop-color="#3d4a63"/>
+      <stop offset="1" stop-color="#232b3c"/>
+    </linearGradient>
+    <linearGradient id="window" x2="0" y2="1">
+      <stop stop-color="#9fd0e8"/>
+      <stop offset="1" stop-color="#6b8da4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="480" fill="url(#wall)"/>
+  <rect x="360" width="480" height="20" fill="#fffbe8"/>
+  <rect x="48" y="128" width="312" height="240" fill="url(#window)" stroke="#f4f4f0" stroke-width="10"/>
+  <path d="M110 128v240m62-240v240m62-240v240m62-240v240" stroke="#eef0eb" stroke-width="8" opacity=".8"/>
+  <path d="M48 190h312M48 246h312M48 302h312" stroke="#eef0eb" stroke-width="10" opacity=".9"/>
+  <rect x="888" y="112" width="252" height="208" fill="#fff" stroke="#8d9aa3" stroke-width="5"/>
+  <text x="1014" y="160" fill="#1d2433" font-family="sans-serif" font-size="25" font-weight="800" text-anchor="middle">CHỈ TIÊU Q4</text>
+  <g fill="#e5383b">
+    <rect x="918" y="254" width="34" height="42"/>
+    <rect x="968" y="224" width="34" height="72"/>
+    <rect x="1018" y="194" width="34" height="102"/>
+    <rect x="1068" y="164" width="34" height="132"/>
+  </g>
+  <rect y="472" width="1200" height="8" fill="#8d9aa3"/>
+  <rect y="480" width="1200" height="320" fill="url(#floor)"/>
+  <g fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="3">
+    <path d="M600 480L0 800M600 480L75 800M600 480L150 800M600 480L225 800M600 480L300 800M600 480L375 800M600 480L450 800M600 480L525 800"/>
+    <path d="M600 480L675 800M600 480L750 800M600 480L825 800M600 480L900 800M600 480L975 800M600 480L1050 800M600 480L1125 800M600 480L1200 800"/>
+  </g>
+</svg>

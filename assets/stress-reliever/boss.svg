@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 540">
+  <g stroke-linejoin="round">
+    <path fill="#2b3550" d="M76 320h58v195q0 12-12 12H88q-12 0-12-12zM146 320h58v195q0 12-12 12h-34q-12 0-12-12z"/>
+    <ellipse cx="104" cy="522" rx="38" ry="12" fill="#12161f"/>
+    <ellipse cx="176" cy="522" rx="38" ry="12" fill="#12161f"/>
+    <path fill="#dbe6f1" d="M18 133h40v170q0 18-20 18t-20-18zM222 133h40v170q0 18-20 18t-20-18z"/>
+    <ellipse cx="38" cy="315" rx="17" ry="20" fill="#f2c9a0"/>
+    <ellipse cx="242" cy="315" rx="17" ry="20" fill="#f2c9a0"/>
+    <path fill="#e9f0f7" d="M60 123q0-13 14-13h132q14 0 14 13v201q0 16-16 16H76q-16 0-16-16z"/>
+    <path fill="#1c2233" d="M60 321h160v16H60z"/>
+    <path fill="#d0342c" d="M128 112h24l-3 28 11 122-20 18-20-18 11-122z"/>
+    <rect x="74" y="180" width="40" height="26" rx="4" fill="#fff"/>
+    <text x="94" y="199" fill="#1d2433" font-family="sans-serif" font-size="14" font-weight="800" text-anchor="middle">KPI</text>
+    <rect x="124" y="87" width="32" height="30" rx="6" fill="#f2c9a0"/>
+  </g>
+</svg>

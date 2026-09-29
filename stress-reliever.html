@@ -378,6 +378,12 @@
     const oc = document.createElement('canvas');
     oc.width = 280;
     oc.height = 540;
+    const art = {};
+    for (const name of ['office', 'boss', 'head', 'vase', 'cup']) {
+      art[name] = new Image();
+      art[name].src = 'assets/stress-reliever/' + name + '.svg';
+    }
+    const assetReady = (image) => image.complete && image.naturalWidth > 0;
 
     const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let W, H, K, fs, D;
@@ -430,6 +436,23 @@
     /* ---- âm thanh ---- */
     let AC;
     let muted = false;
+    const SOUND_FILES = {
+      punch: 'punch.wav',
+      slap: 'slap.wav',
+      kick: 'kick.wav',
+      upper: 'upper.wav',
+      whoosh: 'whoosh.wav',
+      ouch: 'ouch.wav',
+      win: 'win.wav',
+    };
+    const soundData = Object.fromEntries(Object.entries(SOUND_FILES).map(([key, file]) => [
+      key,
+      fetch('assets/stress-reliever/audio/' + file)
+        .then((response) => response.ok ? response.arrayBuffer() : null)
+        .catch(() => null),
+    ]));
+    const soundBuffers = {};
+    let soundLoading;
 
     function au() {
       if (!AC) {
@@ -442,75 +465,31 @@
       return AC;
     }
 
-    function tone(f, f2, d, ty, v) {
-      if (!AC || muted) return;
-
-      const t = AC.currentTime;
-      const o = AC.createOscillator();
-      const g = AC.createGain();
-      o.type = ty;
-      o.frequency.setValueAtTime(f, t);
-      o.frequency.exponentialRampToValueAtTime(Math.max(1, f2), t + d);
-      g.gain.setValueAtTime(v, t);
-      g.gain.exponentialRampToValueAtTime(.001, t + d);
-      o.connect(g).connect(AC.destination);
-      o.start();
-      o.stop(t + d);
+    function loadSoundBuffers() {
+      if (!AC) return Promise.resolve();
+      if (!soundLoading) {
+        soundLoading = Promise.all(Object.entries(soundData).map(async ([key, data]) => {
+          const bytes = await data;
+          if (!bytes) return;
+          try {
+            soundBuffers[key] = await AC.decodeAudioData(bytes.slice(0));
+          } catch (e) {}
+        }));
+      }
+      return soundLoading;
     }
 
-    function nz(d, f, v, ty) {
-      if (!AC || muted) return;
-
-      const t = AC.currentTime;
-      const n = AC.sampleRate * d | 0;
-      const b = AC.createBuffer(1, n, AC.sampleRate);
-      const c = b.getChannelData(0);
-      for (let i = 0; i < n; i++) c[i] = Math.random() * 2 - 1;
-
-      const s = AC.createBufferSource();
-      const fl = AC.createBiquadFilter();
-      const g = AC.createGain();
-      s.buffer = b;
-      fl.type = ty;
-      fl.frequency.value = f;
-      g.gain.setValueAtTime(v, t);
-      g.gain.exponentialRampToValueAtTime(.001, t + d);
-      s.connect(fl).connect(g).connect(AC.destination);
-      s.start();
+    function playSound(key) {
+      if (!AC || muted || !soundBuffers[key]) return;
+      const source = AC.createBufferSource();
+      source.buffer = soundBuffers[key];
+      source.connect(AC.destination);
+      source.start();
     }
-
-    const SND = {
-      punch() {
-        tone(150, 40, .2, 'sine', 1);
-        nz(.09, 1000, .6, 'lowpass');
-      },
-      slap() {
-        nz(.14, 2500, 1, 'highpass');
-        tone(700, 200, .07, 'square', .12);
-      },
-      kick() {
-        tone(100, 28, .34, 'sine', 1.2);
-        nz(.18, 600, .9, 'lowpass');
-      },
-      upper() {
-        tone(190, 55, .26, 'triangle', 1);
-        nz(.1, 1400, .6, 'lowpass');
-      },
-      whoosh() {
-        nz(.16, 900, .18, 'bandpass');
-      },
-      ouch() {
-        tone(420, 260, .16, 'sawtooth', .07);
-      },
-      win() {
-        [523, 659, 784, 1047].forEach((f, i) =>
-          setTimeout(() => tone(f, f, .25, 'triangle', .25), i * 120),
-        );
-      },
-    };
 
     const snd = (key) => {
-      if (au() && SND[key]) SND[key]();
+      if (!au() || muted) return;
+      loadSoundBuffers().then(() => playSound(key));
     };
 
     /* ---- dữ liệu ---- */
@@ -620,6 +599,72 @@ function mk(g,m){
 function drawD(){
   const g=oc.getContext('2d');
   g.clearRect(0,0,280,540);
+  if(assetReady(art.boss)&&assetReady(art.head)){
+    g.drawImage(art.boss,0,0,280,540);
+    const hs=1+Math.min(.22,D.hh*.03),st=stress,hurt=D.hurt>0;
+    g.save();
+    g.translate(140,70);
+    g.scale(hs,hs);
+    g.drawImage(art.head,-56,-58,112,116);
+    g.strokeStyle='#222';
+    g.fillStyle='#222';
+    g.lineWidth=3;
+    g.beginPath();
+    g.arc(-22,4,15,0,7);
+    g.moveTo(37,4);
+    g.arc(22,4,15,0,7);
+    g.moveTo(-7,4);
+    g.lineTo(7,4);
+    g.stroke();
+    g.lineWidth=4;
+    g.lineCap='round';
+    if(D.ko||st<=0){
+      g.beginPath();
+      for(const s of[-22,22]){
+        g.moveTo(s-8,-4);
+        g.lineTo(s+8,12);
+        g.moveTo(s+8,-4);
+        g.lineTo(s-8,12)
+      }
+      g.stroke()
+    }
+    else if(hurt){
+      g.beginPath();
+      g.moveTo(-30,-3);
+      g.lineTo(-16,4);
+      g.lineTo(-30,11);
+      g.moveTo(30,-3);
+      g.lineTo(16,4);
+      g.lineTo(30,11);
+      g.stroke()
+    }
+    else{
+      el(g,-22,4,4.5,5.5);
+      el(g,22,4,4.5,5.5)
+    }
+    if(hurt||st<25){
+      g.fillStyle='#5a1a1a';
+      el(g,0,36,11,9)
+    }
+    else if(st<65){
+      g.beginPath();
+      g.moveTo(-14,34);
+      g.lineTo(14,34);
+      g.stroke()
+    }
+    else{
+      g.beginPath();
+      g.arc(0,22,16,.2,Math.PI-.2);
+      g.stroke()
+    }
+    g.restore();
+    g.save();
+    g.translate(140,525);
+    g.globalCompositeOperation='source-atop';
+    for(const m of D.marks)mk(g,m);
+    g.restore();
+    return
+  }
   g.save();
   g.translate(140,525);
   g.globalCompositeOperation='source-over';
@@ -948,6 +993,11 @@ function fists(){
 }
 /* ---- nền văn phòng ---- */
 function bg(){
+  if(assetReady(art.office)){
+    ctx.drawImage(art.office,0,0,W,H);
+    for(const prop of props)drawProp(prop);
+    return
+  }
   const hz=H*.6;
   let g=ctx.createLinearGradient(0,0,0,hz);
   g.addColorStop(0,'#dfe5e8');
@@ -1005,6 +1055,19 @@ function drawProp(prop){
   ctx.fillRect(x-r*.62,base,r*.12,r*.8);
   ctx.fillRect(x+r*.5,base,r*.12,r*.8);
   if(prop.timer>0&&prop.type=='cup'){
+    ctx.restore();
+    return;
+  }
+  const image=art[prop.type];
+  if(assetReady(image)){
+    if(prop.type=='vase'){
+      ctx.translate(x,base-r*.12);
+      ctx.rotate(prop.tilt);
+      ctx.drawImage(image,-r*.5,-r*1.65,r,r*1.65);
+    }
+    else{
+      ctx.drawImage(image,x-r*.5,base-r*.94,r,r);
+    }
     ctx.restore();
     return;
   }
