@@ -222,6 +222,17 @@
       font-weight: 800;
     }
 
+    .urgent-countdown {
+      padding: 5px 9px;
+      border: 1px solid var(--coral-dark);
+      border-radius: 999px;
+      color: var(--coral-dark);
+      background: #f9d2c7;
+      font-size: 11px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
     .person {
       display: flex;
       align-items: center;
@@ -434,6 +445,7 @@
             <div class="case-head">
               <span id="queue-number" class="queue-number">YÊU CẦU 01</span>
               <span id="priority" class="priority">BÌNH THƯỜNG</span>
+              <span id="urgent-countdown" class="urgent-countdown" role="timer" aria-label="Thời gian xử lý yêu cầu khẩn cấp" hidden></span>
             </div>
             <div class="person">
               <div id="avatar" class="avatar" aria-hidden="true">🧑‍💻</div>
@@ -509,24 +521,54 @@
 
   <script>
     const requests = [
-      { name: 'Minh Anh', department: 'Marketing', avatar: '🧑‍🎨', priority: 'GẤP', title: 'Xin duyệt ngân sách mua một chiếc chuông gọi trà.', detail: 'Lý do: Nhân viên pha trà ở tầng 3 không nghe thấy tiếng gọi bằng telepathy.', kind: 'practical' },
+      { name: 'Minh Anh', department: 'Marketing', avatar: '🧑‍🎨', priority: 'BÌNH THƯỜNG', title: 'Xin duyệt ngân sách mua một chiếc chuông gọi trà.', detail: 'Lý do: Nhân viên pha trà ở tầng 3 không nghe thấy tiếng gọi bằng telepathy.', kind: 'practical' },
       { name: 'Quốc Bảo', department: 'Kỹ thuật', avatar: '👨‍💻', priority: 'BÌNH THƯỜNG', title: 'Cho phép deploy code vào thứ Sáu lúc 17:59.', detail: 'Cam kết: Nếu có sự cố thì sẽ... cùng nhau học được rất nhiều điều.', kind: 'risky' },
       { name: 'Thu Hà', department: 'Nhân sự', avatar: '👩‍💼', priority: 'KHẨN CẤP', title: 'Xin thêm một ngày nghỉ để hồi phục sau ngày nghỉ hôm qua.', detail: 'Ghi chú: Đây là vấn đề về tinh thần, thể chất và có thể cả tâm linh.', kind: 'silly' },
       { name: 'Đức Long', department: 'Kinh doanh', avatar: '🧑‍💼', priority: 'BÌNH THƯỜNG', title: 'Đổi tên chức danh thành “Phù thủy chốt đơn”.', detail: 'Mục tiêu: Khiến chữ ký email có thêm một chút phép thuật.', kind: 'silly' },
-      { name: 'Bảo Ngọc', department: 'Tài chính', avatar: '👩‍🔬', priority: 'GẤP', title: 'Mua một chiếc ghế công thái học cho... cây văn phòng.', detail: 'Cây trầu bà đã ngồi sai tư thế suốt ba quý và đang có dấu hiệu đau lưng.', kind: 'silly' },
+      { name: 'Bảo Ngọc', department: 'Tài chính', avatar: '👩‍🔬', priority: 'BÌNH THƯỜNG', title: 'Mua một chiếc ghế công thái học cho... cây văn phòng.', detail: 'Cây trầu bà đã ngồi sai tư thế suốt ba quý và đang có dấu hiệu đau lưng.', kind: 'silly' },
       { name: 'Hoàng Nam', department: 'Sản phẩm', avatar: '🧑‍🚀', priority: 'BÌNH THƯỜNG', title: 'Cho phép cả team họp trong im lặng bằng ánh mắt.', detail: 'Phương án này sẽ tiết kiệm thời gian, nhưng cần phòng Hành chính mua thêm rèm.', kind: 'transfer' },
       { name: 'Khánh Linh', department: 'Chăm sóc khách hàng', avatar: '👩‍💻', priority: 'KHẨN CẤP', title: 'Xin một ngày không nhận email, chỉ nhận thư bồ câu.', detail: 'Lý do: Hộp thư đến đang có 1.204 email chưa đọc và một lời tiên tri.', kind: 'silly' },
-      { name: 'Tuấn Kiệt', department: 'Pháp chế', avatar: '🧑‍⚖️', priority: 'GẤP', title: 'Mời pháp chế xem giúp điều khoản “vui vẻ lên”.', detail: 'Điều khoản này xuất hiện trong toàn bộ 47 bản hợp đồng và chưa ai hiểu nó có nghĩa gì.', kind: 'transfer' },
+      { name: 'Tuấn Kiệt', department: 'Pháp chế', avatar: '🧑‍⚖️', priority: 'BÌNH THƯỜNG', title: 'Mời pháp chế xem giúp điều khoản “vui vẻ lên”.', detail: 'Điều khoản này xuất hiện trong toàn bộ 47 bản hợp đồng và chưa ai hiểu nó có nghĩa gì.', kind: 'transfer' },
       { name: 'Mai Phương', department: 'Thiết kế', avatar: '👩‍🎨', priority: 'BÌNH THƯỜNG', title: 'Đổi logo công ty thành một con vịt mặc blazer.', detail: 'Nghiên cứu người dùng cho thấy 100% người được hỏi thích vịt.', kind: 'creative' },
-      { name: 'Anh Duy', department: 'Vận hành', avatar: '🧑‍🔧', priority: 'GẤP', title: 'Cho phép làm việc tại nhà vì chiếc ghế ở văn phòng nhớ tôi.', detail: 'Bằng chứng đính kèm: một tấm ảnh chiếc ghế nhìn ra cửa sổ.', kind: 'silly' },
+      { name: 'Anh Duy', department: 'Vận hành', avatar: '🧑‍🔧', priority: 'BÌNH THƯỜNG', title: 'Cho phép làm việc tại nhà vì chiếc ghế ở văn phòng nhớ tôi.', detail: 'Bằng chứng đính kèm: một tấm ảnh chiếc ghế nhìn ra cửa sổ.', kind: 'silly' },
       { name: 'Ngọc Trâm', department: 'Nghiên cứu', avatar: '👩‍🔬', priority: 'BÌNH THƯỜNG', title: 'Mua thêm một màn hình để theo dõi màn hình hiện tại.', detail: 'Đề tài nghiên cứu: Liệu năng suất có tăng khi ta quan sát nó không?', kind: 'transfer' },
       { name: 'Hải Đăng', department: 'IT Helpdesk', avatar: '🧑‍🔧', priority: 'KHẨN CẤP', title: 'Xin cấp quyền admin để đổi hình nền thành hoàng hôn.', detail: 'Máy tính đang chạy tốt. Nhưng tinh thần người dùng thì chưa chắc.', kind: 'risky' },
-      { name: 'Yến Nhi', department: 'Truyền thông', avatar: '👩‍💼', priority: 'GẤP', title: 'Đặt tên cuộc họp là “Cuộc họp không phải cuộc họp”.', detail: 'Mục đích: Thu hút những người đã mệt mỏi với việc nghe chữ cuộc họp.', kind: 'silly' },
+      { name: 'Yến Nhi', department: 'Truyền thông', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Đặt tên cuộc họp là “Cuộc họp không phải cuộc họp”.', detail: 'Mục đích: Thu hút những người đã mệt mỏi với việc nghe chữ cuộc họp.', kind: 'silly' },
       { name: 'Gia Huy', department: 'Kho vận', avatar: '🧑‍🚚', priority: 'BÌNH THƯỜNG', title: 'Xin ngân sách mua bảng chỉ đường đến phòng họp.', detail: 'Đã có bảng chỉ đường đến phòng họp. Nhưng bảng cũng đang bị lạc.', kind: 'transfer' },
       { name: 'Thanh Vy', department: 'Phát triển', avatar: '👩‍💻', priority: 'KHẨN CẤP', title: 'Cho phép đặt tên biến là “đừng hỏi tôi”.', detail: 'Lý do: Biến này đã tồn tại từ trước khi tài liệu kỹ thuật ra đời.', kind: 'risky' },
-      { name: 'Vũ Hoàng', department: 'Ban giám đốc', avatar: '🧑‍✈️', priority: 'GẤP', title: 'Xin duyệt ngân sách cho một buổi brainstorming dưới nước.', detail: 'Địa điểm dự kiến: bể bơi. Ý tưởng dự kiến: sẽ nổi lên.', kind: 'transfer' },
+      { name: 'Vũ Hoàng', department: 'Ban giám đốc', avatar: '🧑‍✈️', priority: 'BÌNH THƯỜNG', title: 'Xin duyệt ngân sách cho một buổi brainstorming dưới nước.', detail: 'Địa điểm dự kiến: bể bơi. Ý tưởng dự kiến: sẽ nổi lên.', kind: 'transfer' },
       { name: 'Tú Uyên', department: 'Kế toán', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Đổi mật khẩu Wi-Fi thành một câu thơ lục bát.', detail: 'Mọi người sẽ nhớ mật khẩu. Có thể sẽ nhớ luôn cả quê hương.', kind: 'creative' },
-      { name: 'Trung Hiếu', department: 'Bảo mật', avatar: '🧑‍💻', priority: 'KHẨN CẤP', title: 'Xin in mật khẩu hệ thống ra giấy để cất vào két.', detail: 'Đề xuất bổ sung: dán mật khẩu lên mặt trước két để không quên.', kind: 'risky' }
+      { name: 'Trung Hiếu', department: 'Bảo mật', avatar: '🧑‍💻', priority: 'KHẨN CẤP', title: 'Xin in mật khẩu hệ thống ra giấy để cất vào két.', detail: 'Đề xuất bổ sung: dán mật khẩu lên mặt trước két để không quên.', kind: 'risky' },
+      { name: 'Phương Linh', department: 'Marketing', avatar: '🧑‍🎨', priority: 'BÌNH THƯỜNG', title: 'Xin ngân sách thuê người vỗ tay sau mỗi slide thuyết trình.', detail: 'Nhóm tin rằng tiếng vỗ tay đúng lúc sẽ giúp biểu đồ tăng trưởng trông thuyết phục hơn.', kind: 'silly' },
+      { name: 'Nhật Minh', department: 'Kỹ thuật', avatar: '👨‍💻', priority: 'KHẨN CẤP', title: 'Cho phép bỏ qua bước kiểm thử vì máy của tôi chạy được rồi.', detail: 'Đã thử trên một máy, một trình duyệt và một tâm trạng rất lạc quan.', kind: 'risky' },
+      { name: 'Khôi Nguyên', department: 'Nhân sự', avatar: '👨‍💼', priority: 'BÌNH THƯỜNG', title: 'Xin lập câu lạc bộ ngủ trưa có chấm công.', detail: 'Thành viên đề xuất tính đây là hoạt động gắn kết đội ngũ và cần có gối đồng phục.', kind: 'practical' },
+      { name: 'Thảo My', department: 'Kinh doanh', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Đổi tên khách hàng tiềm năng thành “bạn thân tương lai”.', detail: 'Đội kinh doanh cho rằng cách gọi mới sẽ khiến việc theo dõi danh sách bớt áp lực.', kind: 'creative' },
+      { name: 'Đình Khang', department: 'Tài chính', avatar: '🧑‍💼', priority: 'BÌNH THƯỜNG', title: 'Mua máy tính cầm tay có nút “mọi thứ sẽ ổn”.', detail: 'Nút này không tính toán gì, nhưng được cho là giúp quyết toán cuối tháng nhẹ nhàng hơn.', kind: 'silly' },
+      { name: 'Hồng Nhung', department: 'Sản phẩm', avatar: '👩‍🎨', priority: 'BÌNH THƯỜNG', title: 'Thêm nút “để mai tính” vào trang thanh toán.', detail: 'Khách hàng có thể chưa mua hôm nay, nhưng sẽ rời đi với cảm giác được thấu hiểu.', kind: 'creative' },
+      { name: 'Minh Anh', department: 'Chăm sóc khách hàng', avatar: '🧑‍💻', priority: 'KHẨN CẤP', title: 'Xin quyền gửi một email trả lời bằng ảnh mèo.', detail: 'Khách đang rất căng thẳng; đội tin rằng một chú mèo bình tĩnh có thể giúp ích.', kind: 'silly' },
+      { name: 'Quốc Bảo', department: 'Pháp chế', avatar: '🧑‍⚖️', priority: 'BÌNH THƯỜNG', title: 'Nhờ pháp chế duyệt câu “đảm bảo không có gì bất ngờ”.', detail: 'Câu này dự kiến xuất hiện trên một kế hoạch có đến ba mục ghi “sẽ cập nhật sau”.', kind: 'transfer' },
+      { name: 'Thu Hà', department: 'Thiết kế', avatar: '👩‍🎨', priority: 'BÌNH THƯỜNG', title: 'Đổi toàn bộ nút bấm thành hình chiếc bánh quy.', detail: 'Người dùng thử nghiệm nói giao diện trông ngon mắt, nhưng chưa ai biết bấm vào đâu.', kind: 'creative' },
+      { name: 'Đức Long', department: 'Vận hành', avatar: '🧑‍🔧', priority: 'BÌNH THƯỜNG', title: 'Xin dời giờ mở cửa văn phòng đến sau khi mọi người tỉnh ngủ.', detail: 'Đề xuất bắt đầu lúc 10 giờ, kết thúc lúc 10 giờ 15 để vẫn kịp lịch họp sáng.', kind: 'practical' },
+      { name: 'Bảo Ngọc', department: 'Nghiên cứu', avatar: '👩‍🔬', priority: 'BÌNH THƯỜNG', title: 'Xin nghiên cứu xem cây cảnh có thích nghe podcast không.', detail: 'Nhóm đã chuẩn bị danh sách phát dài 12 giờ và một bảng khảo sát dành cho lá cây.', kind: 'silly' },
+      { name: 'Hoàng Nam', department: 'IT Helpdesk', avatar: '🧑‍🔧', priority: 'KHẨN CẤP', title: 'Cài lại máy chủ để sửa lỗi máy in bị kẹt giấy.', detail: 'Người gửi xác nhận máy chủ không liên quan, nhưng muốn “nhân tiện dọn dẹp luôn”.', kind: 'risky' },
+      { name: 'Khánh Linh', department: 'Truyền thông', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Phát thông cáo báo chí về việc máy pha cà phê đã hoạt động trở lại.', detail: 'Sự cố kéo dài 11 phút và đã khiến ba cuộc trò chuyện ở pantry bị gián đoạn.', kind: 'silly' },
+      { name: 'Tuấn Kiệt', department: 'Kho vận', avatar: '🧑‍🚚', priority: 'BÌNH THƯỜNG', title: 'Gửi chiếc bàn họp đi bảo hành vì nó nghe quá nhiều bí mật.', detail: 'Bàn không có biểu hiện hỏng hóc, chỉ phát ra tiếng kẽo kẹt mỗi khi đến đoạn quan trọng.', kind: 'transfer' },
+      { name: 'Mai Phương', department: 'Phát triển', avatar: '👩‍💻', priority: 'BÌNH THƯỜNG', title: 'Cho phép đặt tên nhánh mới là “final-final-lần-này-thật”.', detail: 'Nhánh hiện tại là bản thứ bảy và cả đội thống nhất không ai nhớ bản nào đang chạy.', kind: 'risky' },
+      { name: 'Anh Duy', department: 'Ban giám đốc', avatar: '🧑‍✈️', priority: 'KHẨN CẤP', title: 'Xin tổ chức họp chiến lược để quyết định có cần họp chiến lược không.', detail: 'Thời lượng dự kiến 90 phút, kèm một buổi họp chuẩn bị và một buổi tổng kết.', kind: 'transfer' },
+      { name: 'Ngọc Trâm', department: 'Kế toán', avatar: '👩‍🔬', priority: 'BÌNH THƯỜNG', title: 'Cho phép làm tròn mọi khoản chi lên thành một con số đẹp.', detail: 'Bảng tính hiện có quá nhiều số lẻ và nhóm cảm thấy chúng thiếu tinh thần đồng đội.', kind: 'risky' },
+      { name: 'Hải Đăng', department: 'Bảo mật', avatar: '🧑‍💻', priority: 'BÌNH THƯỜNG', title: 'Gửi mã xác thực hai lớp qua loa phát thanh để khỏi ai bỏ lỡ.', detail: 'Đề xuất này giúp tiện lợi hơn, đồng thời cho cả tầng biết mã đăng nhập trong ngày.', kind: 'risky' },
+      { name: 'Yến Nhi', department: 'Marketing', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Chạy chiến dịch quảng cáo nhắm đến chính nhân viên công ty.', detail: 'Ý tưởng là để mọi người bất ngờ khám phá sản phẩm mình đang bán mỗi sáng.', kind: 'creative' },
+      { name: 'Gia Huy', department: 'Kỹ thuật', avatar: '🧑‍💻', priority: 'BÌNH THƯỜNG', title: 'Xin mua thêm dây mạng vì dây hiện tại trông hơi cô đơn.', detail: 'Dây mới sẽ được đặt cạnh dây cũ để tạo môi trường làm việc có tính cộng tác.', kind: 'silly' },
+      { name: 'Thanh Vy', department: 'Nhân sự', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Thêm mục “siêu năng lực” vào hồ sơ nhân viên.', detail: 'Một người ghi khả năng tìm phòng họp trống; người khác khai đọc được tâm trạng máy in.', kind: 'creative' },
+      { name: 'Vũ Hoàng', department: 'Kinh doanh', avatar: '🧑‍💼', priority: 'KHẨN CẤP', title: 'Ký hợp đồng ngay vì khách nói “nghe cũng được đấy”.', detail: 'Chưa chốt giá, phạm vi công việc hay ngày bắt đầu, nhưng cuộc gọi kết thúc khá vui vẻ.', kind: 'risky' },
+      { name: 'Tú Uyên', department: 'Tài chính', avatar: '👩‍💼', priority: 'BÌNH THƯỜNG', title: 'Xin mua một chiếc máy đếm tiền để đếm ngân sách mua máy đếm tiền.', detail: 'Bản dự toán cho thấy thiết bị sẽ hoàn vốn sau khi đếm đủ số tiền đã dùng để mua nó.', kind: 'silly' },
+      { name: 'Trung Hiếu', department: 'Sản phẩm', avatar: '🧑‍🚀', priority: 'BÌNH THƯỜNG', title: 'Thêm chế độ tối, sáng và “tôi chưa uống cà phê”.', detail: 'Chế độ cuối sẽ tự tăng cỡ chữ và giảm số thông báo cho đến giờ nghỉ trưa.', kind: 'creative' },
+      { name: 'Phương Linh', department: 'Chăm sóc khách hàng', avatar: '👩‍💻', priority: 'BÌNH THƯỜNG', title: 'Xin chuyển cuộc gọi khiếu nại sang người đang có tâm trạng tốt nhất.', detail: 'Đội muốn đặt một chiếc chuông nhỏ để báo ai vừa nhận được tin nhắn dễ thương.', kind: 'transfer' },
+      { name: 'Nhật Minh', department: 'Pháp chế', avatar: '🧑‍⚖️', priority: 'BÌNH THƯỜNG', title: 'Nhờ pháp chế đăng ký bản quyền cho câu “để tôi kiểm tra lại”.', detail: 'Câu này được dùng 38 lần trong một buổi họp và nhóm muốn bảo vệ quyền lợi tác giả.', kind: 'transfer' },
+      { name: 'Khôi Nguyên', department: 'Thiết kế', avatar: '🧑‍🎨', priority: 'KHẨN CẤP', title: 'Thay logo trên mọi tài liệu bằng phiên bản vẽ lúc 2 giờ sáng.', detail: 'Bản mới có thêm ba đường xoắn và một hình tròn mà tác giả chưa giải thích được.', kind: 'creative' },
+      { name: 'Thảo My', department: 'Vận hành', avatar: '👩‍🔧', priority: 'BÌNH THƯỜNG', title: 'Xin một chiếc bảng để ghi nhớ vị trí các bảng khác.', detail: 'Ba bảng hướng dẫn gần đây đã được chuyển đi, và không ai nhớ chúng đang ở đâu.', kind: 'practical' },
+      { name: 'Đình Khang', department: 'Nghiên cứu', avatar: '🧑‍🔬', priority: 'BÌNH THƯỜNG', title: 'Xin khảo sát xem nhân viên có đọc khảo sát hay không.', detail: 'Bảng hỏi gồm 40 câu và câu đầu tiên hỏi người tham gia có đọc kỹ hướng dẫn không.', kind: 'silly' },
+      { name: 'Hồng Nhung', department: 'IT Helpdesk', avatar: '👩‍🔧', priority: 'BÌNH THƯỜNG', title: 'Cấp quyền quản trị để đổi con trỏ chuột thành cá heo.', detail: 'Người gửi hứa chỉ dùng quyền đó để làm việc vui vẻ hơn, không đụng đến cài đặt khác.', kind: 'risky' }
     ];
 
     const employeeNames = [
@@ -535,12 +577,15 @@
       'Yến Nhi', 'Gia Huy', 'Thanh Vy', 'Vũ Hoàng', 'Tú Uyên', 'Trung Hiếu',
       'Phương Linh', 'Nhật Minh', 'Khôi Nguyên', 'Thảo My', 'Đình Khang', 'Hồng Nhung'
     ];
-    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false, lastEmployeeName: null, audioContext: null, obedience: 50, instability: 50 };
+    const urgentRequests = requests.filter((item) => item.priority === 'KHẨN CẤP');
+    const URGENT_REQUEST_CHANCE = .2;
+    const URGENT_RESPONSE_SECONDS = 5;
+    const state = { seconds: 60, current: 0, currentItem: null, queue: [], results: [], timerId: null, urgentTimerId: null, urgentSeconds: 0, urgentActive: false, running: false, lastEmployeeName: null, audioContext: null, obedience: 50, instability: 50 };
     const $ = (selector) => document.querySelector(selector);
     const views = { start: $('#start-view'), game: $('#game-view'), summary: $('#summary-view') };
 
     function shuffledRequests() {
-      return [...requests].sort(() => Math.random() - .5);
+      return requests.filter((item) => item.priority !== 'KHẨN CẤP').sort(() => Math.random() - .5);
     }
 
     function showView(view) {
@@ -616,19 +661,42 @@
       } catch {}
     }
 
-    function renderRequest() {
-      const item = state.queue[state.current % state.queue.length];
+    function renderRequest(item) {
+      state.currentItem = item;
       $('#queue-number').textContent = `YÊU CẦU ${String(state.results.length + 1).padStart(2, '0')}`;
       $('#priority').textContent = item.priority;
-      const isUrgent = item.priority === 'KHẨN CẤP';
-      document.body.classList.toggle('is-urgent', isUrgent);
-      if (isUrgent) playUrgentAlarm();
       $('#avatar').textContent = item.avatar;
       $('#employee').textContent = randomEmployeeName();
       $('#department').textContent = item.department;
       $('#request-title').textContent = item.title;
       $('#request-detail').textContent = item.detail;
+    }
+
+    function renderNormalRequest() {
+      const item = state.queue[state.current % state.queue.length];
       state.current += 1;
+      renderRequest(item);
+    }
+
+    function renderUrgentRequest() {
+      const item = urgentRequests[Math.floor(Math.random() * urgentRequests.length)];
+      state.urgentActive = true;
+      state.urgentSeconds = URGENT_RESPONSE_SECONDS;
+      document.body.classList.add('is-urgent');
+      $('#urgent-countdown').hidden = false;
+      $('#urgent-countdown').textContent = `${state.urgentSeconds} GIÂY`;
+      renderRequest(item);
+      playUrgentAlarm();
+      state.urgentTimerId = setInterval(() => {
+        state.urgentSeconds -= 1;
+        if (state.urgentSeconds <= 0) {
+          clearInterval(state.urgentTimerId);
+          state.urgentTimerId = null;
+          decide('rejected');
+          return;
+        }
+        $('#urgent-countdown').textContent = `${state.urgentSeconds} GIÂY`;
+      }, 1000);
     }
 
     function renderTimer() {
@@ -641,18 +709,31 @@
     }
 
     function decide(decision) {
-      if (!state.running) return;
-      const item = state.queue[(state.current - 1) % state.queue.length];
+      if (!state.running || !state.currentItem) return;
+      const wasUrgent = state.urgentActive;
+      const item = state.currentItem;
+      if (wasUrgent) {
+        clearInterval(state.urgentTimerId);
+        state.urgentTimerId = null;
+        state.urgentActive = false;
+        document.body.classList.remove('is-urgent');
+        $('#urgent-countdown').hidden = true;
+      }
       applyDecisionEffects(item.kind, decision);
       state.results.push({ request: item.title, decision });
       updateScore();
-      renderRequest();
+      if (wasUrgent || Math.random() >= URGENT_REQUEST_CHANCE) renderNormalRequest();
+      else renderUrgentRequest();
     }
 
     function endGame() {
       if (!state.running) return;
       state.running = false;
       clearInterval(state.timerId);
+      clearInterval(state.urgentTimerId);
+      state.urgentTimerId = null;
+      state.urgentActive = false;
+      $('#urgent-countdown').hidden = true;
       document.body.classList.remove('is-urgent');
       ['accepted', 'rejected', 'transferred'].forEach((type) => {
         $(`#summary-${type}`).textContent = state.results.filter((item) => item.decision === type).length;
@@ -687,21 +768,28 @@
 
     function startGame() {
       clearInterval(state.timerId);
+      clearInterval(state.urgentTimerId);
       state.seconds = 60;
       state.current = 0;
+      state.currentItem = null;
       state.results = [];
+      state.urgentSeconds = 0;
+      state.urgentActive = false;
       state.obedience = 50;
       state.instability = 50;
       state.lastEmployeeName = null;
       state.queue = shuffledRequests();
       state.running = true;
+      document.body.classList.remove('is-urgent');
+      $('#urgent-countdown').hidden = true;
       $('#timer-fill').style.background = 'var(--yellow)';
       updateScore();
       updateMeters();
       renderTimer();
-      renderRequest();
+      renderNormalRequest();
       showView('game');
       state.timerId = setInterval(() => {
+        if (state.urgentActive) return;
         state.seconds -= 1;
         renderTimer();
         if (state.seconds <= 0) endGame();
