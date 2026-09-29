@@ -328,6 +328,13 @@
     .score-value.accepted { color: #308e6b; }
     .score-value.rejected { color: var(--coral-dark); }
     .score-value.transferred { color: #3e8296; }
+    .meter-group { margin-top: 14px; }
+    .meter-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 11px; font-weight: 700; }
+    .meter-value { font-size: 13px; font-weight: 800; }
+    .meter-track { height: 7px; overflow: hidden; border-radius: 99px; background: #e7e9e2; }
+    .meter-fill { width: 50%; height: 100%; border-radius: inherit; transition: width .25s ease; }
+    #obedience-fill { background: #4b9b79; }
+    #instability-fill { background: var(--coral); }
     .tip-panel { color: var(--muted); background: #f1f2eb; font-size: 12px; line-height: 1.55; }
     .tip-panel h3 { color: var(--ink); }
 
@@ -343,6 +350,11 @@
     .summary-stat.transferred { background: #d6edf2; }
     .summary-stat strong { display: block; margin-bottom: 5px; font-size: 30px; line-height: 1; }
     .summary-stat span { font-size: 12px; font-weight: 700; }
+    .ending-title { margin: 0 0 20px; font-family: 'Space Grotesk', sans-serif; font-size: 23px; line-height: 1.15; }
+    .summary-meters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 26px; }
+    .summary-meter { padding: 15px; border-radius: 10px; background: #f1f2eb; }
+    .summary-meter strong { display: block; margin-bottom: 6px; font-size: 25px; line-height: 1; }
+    .summary-meter span { color: var(--muted); font-size: 12px; font-weight: 700; }
     .summary-list-title { margin-bottom: 12px; font-size: 14px; }
     .log-list { max-height: 260px; margin: 0 0 24px; padding: 0; overflow: auto; list-style: none; border-top: 1px solid var(--line); }
     .log-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
@@ -377,7 +389,7 @@
       .desk-label { display: none; }
       h1 { font-size: clamp(43px, 14vw, 66px); }
       .start-panel, .case-card, .summary-card { padding: 18px; }
-      .rules, .summary-stats { grid-template-columns: 1fr; }
+      .rules, .summary-stats, .summary-meters { grid-template-columns: 1fr; }
       .rule { min-height: auto; }
       .case-card { min-height: 0; }
       .person { margin: 22px 0; }
@@ -451,6 +463,14 @@
               <div class="score-row"><span>Đã duyệt</span><strong id="accepted-count" class="score-value accepted">0</strong></div>
               <div class="score-row"><span>Đã từ chối</span><strong id="rejected-count" class="score-value rejected">0</strong></div>
               <div class="score-row"><span>Đã chuyển</span><strong id="transferred-count" class="score-value transferred">0</strong></div>
+              <div class="meter-group">
+                <div class="meter-head"><span>Độ nghe lời</span><strong id="obedience-value" class="meter-value">50</strong></div>
+                <div class="meter-track" role="progressbar" aria-label="Độ nghe lời nhân viên" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="obedience-fill" class="meter-fill"></div></div>
+              </div>
+              <div class="meter-group">
+                <div class="meter-head"><span>Bất ổn văn phòng</span><strong id="instability-value" class="meter-value">50</strong></div>
+                <div class="meter-track" role="progressbar" aria-label="Độ bất ổn văn phòng" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="instability-fill" class="meter-fill"></div></div>
+              </div>
             </div>
             <div class="tip-panel"><h3>Mẹo của quản lý</h3>Nhấn phím <strong>A</strong>, <strong>X</strong> hoặc <strong>T</strong> để duyệt nhanh. Nhưng đọc kỹ nhé, có người đang xin ngân sách để mua... một chiếc chuông gọi trà.</div>
           </aside>
@@ -461,6 +481,7 @@
         <div class="summary-head">
           <p class="kicker">Hết ca</p>
           <h1>Biên bản<br>một phút.</h1>
+          <h2 id="ending-title" class="ending-title">Bộ máy cân bằng</h2>
           <p id="summary-message">Bạn đã sống sót qua một ca làm việc rất đặc biệt.</p>
         </div>
         <div class="summary-card">
@@ -468,6 +489,10 @@
             <div class="summary-stat accepted"><strong id="summary-accepted">0</strong><span>yêu cầu đã duyệt</span></div>
             <div class="summary-stat rejected"><strong id="summary-rejected">0</strong><span>yêu cầu đã từ chối</span></div>
             <div class="summary-stat transferred"><strong id="summary-transferred">0</strong><span>yêu cầu đã chuyển</span></div>
+          </div>
+          <div class="summary-meters">
+            <div class="summary-meter"><strong id="summary-obedience">50</strong><span>Độ nghe lời</span></div>
+            <div class="summary-meter"><strong id="summary-instability">50</strong><span>Bất ổn văn phòng</span></div>
           </div>
           <h2 class="summary-list-title">Nhật ký quyết định</h2>
           <ul id="log-list" class="log-list"></ul>
@@ -508,7 +533,7 @@
       'Yến Nhi', 'Gia Huy', 'Thanh Vy', 'Vũ Hoàng', 'Tú Uyên', 'Trung Hiếu',
       'Phương Linh', 'Nhật Minh', 'Khôi Nguyên', 'Thảo My', 'Đình Khang', 'Hồng Nhung'
     ];
-    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false, lastEmployeeName: null, audioContext: null };
+    const state = { seconds: 60, current: 0, queue: [], results: [], timerId: null, running: false, lastEmployeeName: null, audioContext: null, obedience: 50, instability: 50 };
     const $ = (selector) => document.querySelector(selector);
     const views = { start: $('#start-view'), game: $('#game-view'), summary: $('#summary-view') };
 
@@ -525,6 +550,29 @@
       ['accepted', 'rejected', 'transferred'].forEach((type) => {
         $(`#${type}-count`).textContent = state.results.filter((item) => item.decision === type).length;
       });
+    }
+
+    function updateMeters() {
+      [['obedience', state.obedience], ['instability', state.instability]].forEach(([name, value]) => {
+        $(`#${name}-value`).textContent = value;
+        const track = $(`#${name}-value`).parentElement.nextElementSibling;
+        track.setAttribute('aria-valuenow', value);
+        $(`#${name}-fill`).style.width = `${value}%`;
+      });
+    }
+
+    function applyDecisionEffects(kind, decision) {
+      const obedienceChanges = { accepted: 6, rejected: -6, transferred: -2 };
+      const instabilityChanges = {
+        practical: { accepted: -4, rejected: 4, transferred: 2 },
+        risky: { accepted: 12, rejected: -10, transferred: 3 },
+        silly: { accepted: 6, rejected: -2, transferred: 2 },
+        transfer: { accepted: 3, rejected: 3, transferred: -8 },
+        creative: { accepted: -2, rejected: 4, transferred: 1 }
+      };
+      state.obedience = Math.max(0, Math.min(100, state.obedience + obedienceChanges[decision]));
+      state.instability = Math.max(0, Math.min(100, state.instability + instabilityChanges[kind][decision]));
+      updateMeters();
     }
 
     function randomEmployeeName() {
@@ -593,6 +641,7 @@
     function decide(decision) {
       if (!state.running) return;
       const item = state.queue[(state.current - 1) % state.queue.length];
+      applyDecisionEffects(item.kind, decision);
       state.results.push({ request: item.title, decision });
       updateScore();
       renderRequest();
@@ -606,10 +655,25 @@
       ['accepted', 'rejected', 'transferred'].forEach((type) => {
         $(`#summary-${type}`).textContent = state.results.filter((item) => item.decision === type).length;
       });
+      $('#summary-obedience').textContent = state.obedience;
+      $('#summary-instability').textContent = state.instability;
       const total = state.results.length;
-      $('#summary-message').textContent = total > 0
-        ? `Bạn đã xử lý ${total} yêu cầu. Phòng Nhân sự đang xem xét việc tặng bạn một chiếc huy hiệu.`
-        : 'Bạn chưa xử lý yêu cầu nào. Đó cũng là một kiểu quản lý thời gian.';
+      const isBalanced = state.obedience >= 40 && state.obedience <= 60
+        && state.instability >= 40 && state.instability <= 60;
+      let ending;
+      if (isBalanced) {
+        ending = { title: 'Bộ máy cân bằng', message: 'Văn phòng giữ được nhịp ổn định: nhân viên hợp tác vừa đủ, không khí chưa đến mức báo động.' };
+      } else if (state.obedience >= 50 && state.instability < 50) {
+        ending = { title: 'Văn phòng vào guồng', message: 'Mọi người phối hợp tốt và ca làm khép lại trong trật tự.' };
+      } else if (state.obedience >= 50 && state.instability >= 50) {
+        ending = { title: 'Đồng lòng trong hỗn loạn', message: 'Nhân viên vẫn nghe lời, nhưng cả văn phòng đang quay cuồng vì những quyết định hôm nay.' };
+      } else if (state.obedience < 50 && state.instability < 50) {
+        ending = { title: 'Yên bình nhưng bất hợp tác', message: 'Không khí đã dịu xuống, nhưng nhân viên không còn mặn mà với các quyết định của bạn.' };
+      } else {
+        ending = { title: 'Khủng hoảng văn phòng', message: 'Bất ổn tăng cao trong khi sự hợp tác giảm xuống. Phòng Nhân sự sẽ cần một cuộc họp.' };
+      }
+      $('#ending-title').textContent = ending.title;
+      $('#summary-message').textContent = `${ending.message} Bạn đã xử lý ${total} yêu cầu.`;
       $('#log-list').innerHTML = state.results.map((item) => {
         const labels = { accepted: 'ĐÃ DUYỆT', rejected: 'ĐÃ TỪ CHỐI', transferred: 'ĐÃ CHUYỂN' };
         return `<li class="log-item"><span class="log-request">${item.request}</span><span class="log-result ${item.decision}">${labels[item.decision]}</span></li>`;
@@ -622,11 +686,14 @@
       state.seconds = 60;
       state.current = 0;
       state.results = [];
+      state.obedience = 50;
+      state.instability = 50;
       state.lastEmployeeName = null;
       state.queue = shuffledRequests();
       state.running = true;
       $('#timer-fill').style.background = 'var(--yellow)';
       updateScore();
+      updateMeters();
       renderTimer();
       renderRequest();
       showView('game');
