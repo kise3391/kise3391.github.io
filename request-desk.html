@@ -331,6 +331,8 @@
     #timer { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 52px; line-height: 1; letter-spacing: -.06em; }
     .timer-track { height: 8px; margin-top: 16px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.22); }
     #timer-fill { width: 100%; height: 100%; border-radius: inherit; background: var(--yellow); transition: width 1s linear, background .3s ease; }
+    #end-game-button { width: 100%; margin-top: 14px; padding: 8px 10px; border: 1px solid rgba(255, 254, 250, .42); border-radius: 8px; color: var(--white); background: transparent; font-size: 12px; font-weight: 700; transition: background .15s ease, border-color .15s ease; }
+    #end-game-button:hover, #end-game-button:focus-visible { border-color: var(--white); background: rgba(255, 255, 255, .12); outline: none; }
 
     .score-panel h3, .tip-panel h3 { margin-bottom: 14px; font-size: 15px; }
     .score-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-top: 1px solid var(--line); font-size: 12px; }
@@ -340,12 +342,10 @@
     .score-value.rejected { color: var(--coral-dark); }
     .score-value.transferred { color: #3e8296; }
     .meter-group { margin-top: 14px; }
-    .meter-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 11px; font-weight: 700; }
-    .meter-value { font-size: 13px; font-weight: 800; }
     .meter-track { height: 7px; overflow: hidden; border-radius: 99px; background: #e7e9e2; }
     .meter-fill { width: 50%; height: 100%; border-radius: inherit; transition: width .25s ease; }
-    #obedience-fill { background: #4b9b79; }
-    #instability-fill { background: var(--coral); }
+    #obedience-fill, #summary-obedience-fill { background: #4b9b79; }
+    #instability-fill, #summary-instability-fill { background: var(--coral); }
     .tip-panel { color: var(--muted); background: #f1f2eb; font-size: 12px; line-height: 1.55; }
     .tip-panel h3 { color: var(--ink); }
 
@@ -363,10 +363,9 @@
     .summary-stat strong { display: block; margin-bottom: 5px; font-size: 30px; line-height: 1; }
     .summary-stat span { font-size: 12px; font-weight: 700; }
     .ending-title { margin: 0 0 20px; font-family: 'Space Grotesk', sans-serif; font-size: 23px; line-height: 1.15; }
-    .summary-meters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 26px; }
-    .summary-meter { padding: 15px; border-radius: 10px; background: #f1f2eb; }
-    .summary-meter strong { display: block; margin-bottom: 6px; font-size: 25px; line-height: 1; }
-    .summary-meter span { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .summary-meters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 26px; }
+    .summary-meter { min-width: 0; }
+    .summary-meter .meter-track { height: 10px; }
     .summary-list-title { margin-bottom: 12px; font-size: 14px; }
     .log-list { max-height: 260px; margin: 0 0 24px; padding: 0; overflow: auto; list-style: none; border-top: 1px solid var(--line); }
     .log-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
@@ -470,6 +469,7 @@
               <p class="panel-label">Thời gian còn lại</p>
               <p id="timer">01:00</p>
               <div class="timer-track"><div id="timer-fill"></div></div>
+              <button id="end-game-button" type="button">Kết thúc ván sớm</button>
             </div>
             <div class="score-panel">
               <h3>Ca trực hôm nay</h3>
@@ -477,12 +477,10 @@
               <div class="score-row"><span>Đã từ chối</span><strong id="rejected-count" class="score-value rejected">0</strong></div>
               <div class="score-row"><span>Đã chuyển</span><strong id="transferred-count" class="score-value transferred">0</strong></div>
               <div class="meter-group">
-                <div class="meter-head"><span>Độ nghe lời</span><strong id="obedience-value" class="meter-value">50</strong></div>
-                <div class="meter-track" role="progressbar" aria-label="Độ nghe lời nhân viên" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="obedience-fill" class="meter-fill"></div></div>
+                <div id="obedience-track" class="meter-track" role="progressbar" aria-label="Độ nghe lời nhân viên" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="obedience-fill" class="meter-fill"></div></div>
               </div>
               <div class="meter-group">
-                <div class="meter-head"><span>Bất ổn văn phòng</span><strong id="instability-value" class="meter-value">50</strong></div>
-                <div class="meter-track" role="progressbar" aria-label="Độ bất ổn văn phòng" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="instability-fill" class="meter-fill"></div></div>
+                <div id="instability-track" class="meter-track" role="progressbar" aria-label="Độ bất ổn văn phòng" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="instability-fill" class="meter-fill"></div></div>
               </div>
             </div>
             <div class="tip-panel"><h3>Mẹo của quản lý</h3>Nhấn phím <strong>A</strong>, <strong>X</strong> hoặc <strong>T</strong> để duyệt nhanh. Nhưng đọc kỹ nhé, có người đang xin ngân sách để mua... một chiếc chuông gọi trà.</div>
@@ -505,8 +503,8 @@
             <div class="summary-stat transferred"><strong id="summary-transferred">0</strong><span>yêu cầu đã chuyển</span></div>
           </div>
           <div class="summary-meters">
-            <div class="summary-meter"><strong id="summary-obedience">50</strong><span>Độ nghe lời</span></div>
-            <div class="summary-meter"><strong id="summary-instability">50</strong><span>Bất ổn văn phòng</span></div>
+            <div class="summary-meter"><div id="summary-obedience-track" class="meter-track" role="progressbar" aria-label="Độ nghe lời nhân viên" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="summary-obedience-fill" class="meter-fill"></div></div></div>
+            <div class="summary-meter"><div id="summary-instability-track" class="meter-track" role="progressbar" aria-label="Độ bất ổn văn phòng" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><div id="summary-instability-fill" class="meter-fill"></div></div></div>
           </div>
           <h2 class="summary-list-title">Nhật ký quyết định</h2>
           <ul id="log-list" class="log-list"></ul>
@@ -601,10 +599,10 @@
 
     function updateMeters() {
       [['obedience', state.obedience], ['instability', state.instability]].forEach(([name, value]) => {
-        $(`#${name}-value`).textContent = value;
-        const track = $(`#${name}-value`).parentElement.nextElementSibling;
-        track.setAttribute('aria-valuenow', value);
-        $(`#${name}-fill`).style.width = `${value}%`;
+        [name, `summary-${name}`].forEach((prefix) => {
+          $(`#${prefix}-track`).setAttribute('aria-valuenow', value);
+          $(`#${prefix}-fill`).style.width = `${value}%`;
+        });
       });
     }
 
@@ -738,8 +736,7 @@
       ['accepted', 'rejected', 'transferred'].forEach((type) => {
         $(`#summary-${type}`).textContent = state.results.filter((item) => item.decision === type).length;
       });
-      $('#summary-obedience').textContent = state.obedience;
-      $('#summary-instability').textContent = state.instability;
+      updateMeters();
       const total = state.results.length;
       const isBalanced = state.obedience >= 40 && state.obedience <= 60
         && state.instability >= 40 && state.instability <= 60;
@@ -798,6 +795,7 @@
 
     $('#start-button').addEventListener('click', startGame);
     $('#restart-button').addEventListener('click', startGame);
+    $('#end-game-button').addEventListener('click', endGame);
     document.querySelectorAll('[data-decision]').forEach((button) => {
       button.addEventListener('click', () => decide(button.dataset.decision));
     });
