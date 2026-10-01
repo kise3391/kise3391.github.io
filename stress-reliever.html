@@ -692,6 +692,8 @@
       props = [
         { type: 'vase', timer: 0, tilt: 0 },
         { type: 'cup', timer: 0 },
+        { type: 'paper', timer: 0 },
+        { type: 'lamp', timer: 0, tilt: 0 },
       ];
     }
 
@@ -944,33 +946,49 @@ function drawD(){
 
     function propLayout(prop) {
       const size = Math.max(20, Math.min(34, W * .075, H * .055));
-      const x = prop.type == 'vase' ? W * .14 : W * .86;
-      const base = H * .78;
-      return { x, base, size };
+      const deskProp = prop.type == 'paper' || prop.type == 'lamp';
+      const x = prop.type == 'vase' ? W * .14
+        : prop.type == 'cup' ? W * .86
+          : prop.type == 'paper' ? W * .11 : W * .89;
+      const base = deskProp ? H * .5175 : H * .78;
+      const hitHeight = prop.type == 'paper' ? 1.2 : prop.type == 'lamp' ? 3.2 : 2.8;
+      return { x, base, size, hitWidth: size * 1.25, hitTop: base - size * hitHeight };
     }
 
     function hitProp(x, y, attack) {
       const hitX = x - shakeX;
       const hitY = y - shakeY;
       for (const prop of props) {
-        const { x: px, base, size } = propLayout(prop);
-        if (Math.abs(hitX - px) > size * 1.25 || hitY < base - size * 2.8 || hitY > base + size * .2) continue;
+        const { x: px, base, hitWidth, hitTop } = propLayout(prop);
+        if (Math.abs(hitX - px) > hitWidth || hitY < hitTop || hitY > base + 4) continue;
         if (prop.timer <= 0) {
           stats.brokenProps++;
           prop.timer = 3;
           if (prop.type == 'vase') {
             prop.tilt = 1.25;
-          } else {
+          } else if (prop.type == 'cup') {
             for (let i = 0; i < 8; i++) {
               P.push({
                 t: 'glass', x, y, vx: R(-150, 150), vy: R(-250, -70),
                 l: R(.7, 1.2), r: R(0, 6), vr: R(-10, 10),
               });
             }
+          } else if (prop.type == 'paper') {
+            for (let i = 0; i < 7; i++) {
+              P.push({
+                t: 'paper', x, y, vx: R(-120, 120), vy: R(-210, -60),
+                l: R(.8, 1.3), r: R(-.5, .5), vr: R(-5, 5),
+              });
+            }
+          } else {
+            prop.tilt = .85;
           }
           const d = A[attack.k];
           snd(d.s);
-          fl(x, y - 24, prop.type == 'vase' ? 'Đổ rồi!' : 'Choang!', '#ffd23f');
+          const message = prop.type == 'vase' ? 'Đổ rồi!'
+            : prop.type == 'cup' ? 'Choang!'
+              : prop.type == 'paper' ? 'Giấy bay!' : 'Đèn chao!';
+          fl(x, y - 24, message, '#ffd23f');
         }
         return true;
       }
@@ -1203,6 +1221,66 @@ function bg(){
 }
 function drawProp(prop){
   const {x,base,size:r}=propLayout(prop);
+  if(prop.type=='paper'){
+    if(prop.timer>0)return;
+    ctx.save();
+    ctx.translate(x,base);
+    ctx.rotate(-.04);
+    ctx.fillStyle='rgba(0,0,0,.18)';
+    ctx.fillRect(-r*.72,2,r*1.5,r*.5);
+    for(let i=2;i>=0;i--){
+      ctx.fillStyle=i==0?'#fff8e7':'#e8edf0';
+      ctx.strokeStyle='#7b8790';
+      ctx.lineWidth=1;
+      ctx.fillRect(-r*.72+i*2,-r*.55+i*2,r*1.42,r*.52);
+      ctx.strokeRect(-r*.72+i*2,-r*.55+i*2,r*1.42,r*.52);
+      ctx.strokeStyle='#a7b2b8';
+      ctx.beginPath();
+      ctx.moveTo(-r*.52+i*2,-r*.4+i*2);
+      ctx.lineTo(r*.47+i*2,-r*.4+i*2);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+  if(prop.type=='lamp'){
+    ctx.save();
+    ctx.translate(x,base);
+    ctx.rotate(prop.tilt);
+    if(prop.timer<=0){
+      ctx.fillStyle='rgba(255,210,90,.16)';
+      ctx.beginPath();
+      ctx.moveTo(-r*.45,-r*2.3);
+      ctx.lineTo(-r*1.25,-r*.08);
+      ctx.lineTo(r*1.3,-r*.08);
+      ctx.lineTo(r*.45,-r*2.3);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.strokeStyle='#354354';
+    ctx.lineWidth=Math.max(2,r*.13);
+    ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(0,-r*.16);
+    ctx.lineTo(r*.18,-r*1.75);
+    ctx.lineTo(-r*.08,-r*2.35);
+    ctx.stroke();
+    ctx.fillStyle='#344252';
+    el(ctx,0,-r*.12,r*.66,r*.14);
+    ctx.fillStyle=prop.timer>0?'#87919a':'#f2bd53';
+    ctx.strokeStyle='#46515c';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(-r*.62,-r*2.15);
+    ctx.lineTo(-r*.43,-r*2.85);
+    ctx.quadraticCurveTo(0,-r*3.02,r*.43,-r*2.85);
+    ctx.lineTo(r*.62,-r*2.15);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
   ctx.save();
   ctx.fillStyle='rgba(0,0,0,.28)';
   el(ctx,x,base+3,r*1.1,r*.2);
@@ -1290,6 +1368,7 @@ function step(dt){
   for(const prop of props){
     if(prop.timer>0)prop.timer=Math.max(0,prop.timer-dt);
     if(prop.type=='vase')prop.tilt=lerp(prop.tilt,prop.timer>0?1.25:0,Math.min(1,dt*7));
+    if(prop.type=='lamp')prop.tilt=lerp(prop.tilt,prop.timer>0?.85:0,Math.min(1,dt*7));
   }
   for(const m of D.marks)m.age+=dt;
   if(D.st<0&&!D.ko){
@@ -1386,6 +1465,14 @@ function draw(){
       ctx.lineTo(-5,3);
       ctx.closePath();
       ctx.fill();
+    }
+    else if(q.t=='paper'){
+      ctx.rotate(q.r);
+      ctx.fillStyle='#fff8e7';
+      ctx.strokeStyle='#8d9aa3';
+      ctx.lineWidth=1;
+      ctx.fillRect(-7,-5,14,10);
+      ctx.strokeRect(-7,-5,14,10);
     }
     else{
       ctx.rotate(q.r);
