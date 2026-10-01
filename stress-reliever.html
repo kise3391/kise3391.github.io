@@ -85,6 +85,24 @@
       pointer-events: auto;
     }
 
+    #faceStatus {
+      position: fixed;
+      z-index: 2;
+      top: calc(58px + env(safe-area-inset-top, 0px));
+      left: 50%;
+      max-width: calc(100vw - 24px);
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: #fff8e7;
+      color: #1d2433;
+      border: 2px solid #1d2433;
+      border-radius: 8px;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+      font-size: 12px;
+      text-align: center;
+      pointer-events: none;
+    }
+
     button {
       font: 800 14px 'Be Vietnam Pro', system-ui, sans-serif;
       background: #1d2433;
@@ -240,7 +258,26 @@
       #top .r {
         grid-area: actions;
         align-self: start;
+        display: grid;
+        grid-template-columns: 44px minmax(70px, max-content);
+        grid-template-areas: "mute upload" "remove reset";
         gap: 6px;
+      }
+
+      #top #mute {
+        grid-area: mute;
+      }
+
+      #top #faceUpload {
+        grid-area: upload;
+      }
+
+      #top #faceReset {
+        grid-area: remove;
+      }
+
+      #top #reset {
+        grid-area: reset;
       }
 
       #top button {
@@ -251,6 +288,21 @@
       #top #mute {
         width: 44px;
         padding: 8px;
+      }
+
+      #top #faceUpload,
+      #top #faceReset {
+        padding: 8px 6px;
+        font-size: 11px;
+      }
+
+      #top #faceReset {
+        width: 44px;
+        padding: 8px 2px;
+      }
+
+      #faceStatus {
+        top: calc(104px + env(safe-area-inset-top, 0px));
       }
 
       #ctl {
@@ -317,6 +369,10 @@
         padding: 6px 8px;
       }
 
+      #faceStatus {
+        top: calc(58px + env(safe-area-inset-top, 0px));
+      }
+
       #ctl {
         display: flex;
         justify-content: center;
@@ -345,9 +401,13 @@
       <div class="note" id="cb">Combo x0</div>
       <div class="r">
         <button id="mute" aria-label="Bật/tắt âm thanh">🔊</button>
+        <input id="faceFile" type="file" accept="image/*" hidden>
+        <button id="faceUpload" type="button" aria-controls="faceFile">Ảnh mặt</button>
+        <button id="faceReset" type="button" hidden>Gỡ ảnh</button>
         <button id="reset">Sếp mới</button>
       </div>
     </div>
+    <div id="faceStatus" role="status" aria-live="polite" hidden></div>
     <div id="hint">Rê chuột để ngắm, nhấp để ra đòn. Chuột phải: vả. Phím J, K, L, Space.</div>
     <div id="end" hidden>
       <b>Xả stress xong! 🎉</b>
@@ -379,11 +439,102 @@
     oc.width = 280;
     oc.height = 540;
     const art = {};
-    for (const name of ['office', 'boss', 'head', 'vase', 'cup']) {
+    for (const name of ['office', 'boss', 'head', 'head-overlay', 'vase', 'cup']) {
       art[name] = new Image();
       art[name].src = 'assets/stress-reliever/' + name + '.svg';
     }
     const assetReady = (image) => image.complete && image.naturalWidth > 0;
+    const FACE_WIDTH = 112;
+    const FACE_HEIGHT = 116;
+    const MAX_FACE_FILE_SIZE = 8 * 1024 * 1024;
+    let customFace = null;
+    let faceLoadToken = 0;
+
+    function setFaceStatus(message) {
+      $('faceStatus').textContent = message;
+      $('faceStatus').hidden = !message;
+    }
+
+    function stylizeFace(image) {
+      const face = document.createElement('canvas');
+      face.width = FACE_WIDTH;
+      face.height = FACE_HEIGHT;
+      const faceContext = face.getContext('2d', { willReadFrequently: true });
+      const scale = Math.max(FACE_WIDTH / image.naturalWidth, FACE_HEIGHT / image.naturalHeight);
+      const width = image.naturalWidth * scale;
+      const height = image.naturalHeight * scale;
+
+      faceContext.fillStyle = '#f2c9a0';
+      faceContext.fillRect(0, 0, FACE_WIDTH, FACE_HEIGHT);
+      faceContext.save();
+      faceContext.beginPath();
+      faceContext.ellipse(FACE_WIDTH / 2, FACE_HEIGHT / 2, FACE_WIDTH / 2, FACE_HEIGHT / 2, 0, 0, Math.PI * 2);
+      faceContext.clip();
+      faceContext.drawImage(image, (FACE_WIDTH - width) / 2, (FACE_HEIGHT - height) / 2, width, height);
+      faceContext.restore();
+
+      const frame = faceContext.getImageData(0, 0, FACE_WIDTH, FACE_HEIGHT);
+      const luminance = new Float32Array(FACE_WIDTH * FACE_HEIGHT);
+      for (let i = 0; i < frame.data.length; i += 4) {
+        for (let channel = 0; channel < 3; channel++) {
+          const contrasted = ((frame.data[i + channel] / 255 - .5) * 1.12 + .5) * 255;
+          frame.data[i + channel] = Math.max(0, Math.min(255, Math.round(contrasted / 51) * 51));
+        }
+        luminance[i / 4] = frame.data[i] * .299 + frame.data[i + 1] * .587 + frame.data[i + 2] * .114;
+      }
+
+      for (let y = 1; y < FACE_HEIGHT - 1; y++) {
+        for (let x = 1; x < FACE_WIDTH - 1; x++) {
+          const index = y * FACE_WIDTH + x;
+          const gx = -luminance[index - FACE_WIDTH - 1] + luminance[index - FACE_WIDTH + 1]
+            - 2 * luminance[index - 1] + 2 * luminance[index + 1]
+            - luminance[index + FACE_WIDTH - 1] + luminance[index + FACE_WIDTH + 1];
+          const gy = -luminance[index - FACE_WIDTH - 1] - 2 * luminance[index - FACE_WIDTH] - luminance[index - FACE_WIDTH + 1]
+            + luminance[index + FACE_WIDTH - 1] + 2 * luminance[index + FACE_WIDTH] + luminance[index + FACE_WIDTH + 1];
+          const edge = Math.min(.48, Math.max(0, (Math.hypot(gx, gy) - 320) / 900));
+          if (edge === 0) continue;
+          const pixel = index * 4;
+          for (let channel = 0; channel < 3; channel++) {
+            frame.data[pixel + channel] *= 1 - edge;
+          }
+        }
+      }
+      faceContext.putImageData(frame, 0, 0);
+      return face;
+    }
+
+    async function useFaceFile(file) {
+      const token = ++faceLoadToken;
+      if (!file.type.startsWith('image/')) {
+        setFaceStatus('Tệp đã chọn không phải ảnh.');
+        return;
+      }
+      if (file.size > MAX_FACE_FILE_SIZE) {
+        setFaceStatus('Ảnh quá lớn. Hãy chọn tệp dưới 8 MB.');
+        return;
+      }
+
+      let objectUrl;
+      try {
+        objectUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.src = objectUrl;
+        await image.decode();
+        if (token !== faceLoadToken) return;
+        if (image.naturalWidth > 8192 || image.naturalHeight > 8192
+          || image.naturalWidth * image.naturalHeight > 40000000) {
+          setFaceStatus('Kích thước ảnh vượt giới hạn hỗ trợ.');
+          return;
+        }
+        customFace = stylizeFace(image);
+        $('faceReset').hidden = false;
+        setFaceStatus('');
+      } catch (error) {
+        if (token === faceLoadToken) setFaceStatus('Không thể đọc ảnh này. Hãy thử một tệp ảnh khác.');
+      } finally {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      }
+    }
 
     const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let W, H, K, fs, D;
@@ -605,7 +756,12 @@ function drawD(){
     g.save();
     g.translate(140,70);
     g.scale(hs,hs);
-    g.drawImage(art.head,-56,-58,112,116);
+    if(customFace&&assetReady(art['head-overlay'])){
+      g.drawImage(customFace,-56,-58,112,116);
+      g.drawImage(art['head-overlay'],-56,-58,112,116)
+    }else{
+      g.drawImage(art.head,-56,-58,112,116)
+    }
     g.strokeStyle='#222';
     g.fillStyle='#222';
     g.lineWidth=3;
@@ -1296,6 +1452,20 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
       muted = !muted;
       e.target.textContent = muted ? '🔇' : '🔊';
       e.target.blur();
+    };
+
+    $('faceUpload').onclick = () => $('faceFile').click();
+    $('faceFile').onchange = (event) => {
+      const [file] = event.target.files;
+      event.target.value = '';
+      if (file) useFaceFile(file);
+    };
+
+    $('faceReset').onclick = () => {
+      faceLoadToken++;
+      customFace = null;
+      $('faceReset').hidden = true;
+      setFaceStatus('');
     };
 
     $('reset').onclick = $('again').onclick = (e) => {
